@@ -3,6 +3,10 @@
 import sys
 import numpy as np
 import h5py
+import tables
+import io
+import Image
+from array import array
 
 linesIn = 0
 
@@ -34,8 +38,9 @@ for line in  open(r'\tmp\seed.csv'):                        # read and dump the 
                 bytes.extend(byte)                          # bytes contains the image data (TODO: inefficient, but works)
                 byteCnt += 1
                 byte = f2.read(1)    
-        grp['photo'] = bytes                                # add the photo member to the group
-        
+        image = Image.open(io.BytesIO(bytes))               # convert byte array to an image
+        grp['photo'] = image								# add the image member to the group
+
         ds = f.create_dataset(fields[0] + "/emissions", (100,), dtype=('a10,f4,f4,f4'))
         emissionPtr = 0
     if(linesIn != 1):                                       # skip the header, write the emissions record ...
