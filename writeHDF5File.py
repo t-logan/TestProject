@@ -1,22 +1,21 @@
 # writeHDF5File.py
 
 import sys
-import numpy as np
 import h5py
-import tables
 import io
 import Image
-from array import array
 
 linesIn = 0
 
-if len(sys.argv) != 2:                                      # check number of command line args
-    print "Please supply the output directory name. Quitting."
+if len(sys.argv) != 4:                                      # check number of command line args
+    print "Argument error, need: <output directory> <image file name> <CSV file name>. Quitting."
     raise SystemExit(1)
 else:
-    print "Output directory is " + sys.argv[1]              # display output file name                             
+    print "Output directory: " + sys.argv[1]                # display output directory name                             
+    print "Image file: " + sys.argv[2]                      # display image file name                             
+    print "Input CSV file: " + sys.argv[3]                  # display CSV file name                             
 
-for line in  open(r'\tmp\seed.csv'):                        # read and dump the csv file
+for line in  open(sys.argv[3]):                             # read the CSV file
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
@@ -30,15 +29,7 @@ for line in  open(r'\tmp\seed.csv'):                        # read and dump the 
         grp['odometer'] = float(fields[5])
         grp['comments'] = fields[6]
         
-        byteCnt = 0
-        bytes = bytearray()
-        with open("DLCSchema.png", "rb") as f2:             # read the image / TODO: parameterize
-            byte = f2.read(1)
-            while byte != b"":
-                bytes.extend(byte)                          # bytes contains the image data (TODO: inefficient, but works)
-                byteCnt += 1
-                byte = f2.read(1)    
-        image = Image.open(io.BytesIO(bytes))               # convert byte array to an image
+        image = Image.open(sys.argv[2])                     # read the image file
         grp['photo'] = image								# add the image member to the group
 
         ds = f.create_dataset(fields[0] + "/emissions", (100,), dtype=('a10,f4,f4,f4'))
