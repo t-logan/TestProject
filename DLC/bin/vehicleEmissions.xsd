@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.epa.gov"
+    xmlns="http://www.epa.gov" elementFormDefault="qualified">
+    <xs:element name="vehicleEmissions"> </xs:element>
+    <xs:element name="vehicle">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element name="vin" type="vinType" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="manufacturer" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="modelYear" type="xs:integer" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="vehicleType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="oilChangeDistance" type="xs:float" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="odometer" type="xs:float" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="comments" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                <xs:element name="photo" type="xs:base64Binary"/>
+                <xs:element name="emissions" type="emissionsType" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <!-- 
+        Emissions data.
+    -->
+    <xs:complexType name="emissionsType">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element name="dateTested" type="xs:date"/>
+            <xs:element name="exhaustHC" type="xs:float"/>
+            <xs:element name="nonExhaustHC" type="xs:float"/>
+            <xs:element name="exhaustCO" type="xs:float"/>
+            <xs:element name="exhaustNO2" type="xs:float"/>
+        </xs:sequence>
+    </xs:complexType>
+    <!-- 
+        VIN Number
+    -->
+    <xs:simpleType name="vinType">
+        <xs:restriction base="xs:string">
+            <xs:length value="17"/>
+        </xs:restriction>
+    </xs:simpleType>
+ </xs:schema>
