@@ -3,6 +3,7 @@
 import sys
 import h5py
 import Image
+import string
 
 linesIn = 0
 
@@ -21,12 +22,12 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         f = h5py.File(sys.argv[1] + "\\" + fields[0] + ".hdf5", "w")   # open the output HDF5 File
         
         grp = f.create_group(fields[0])                     # create vehicle group (VIN id)
-        grp['manufacturer'] = fields[1]                     # populate the vehicle group ...
+        grp['manufacturer'] = string.strip(fields[1], '"')  # populate the vehicle group ...
         grp['modelYear'] = int(fields[2])
         grp['vehicleType'] = fields[3]
         grp['oilChangeDistance'] = float(fields[4])
         grp['odometer'] = float(fields[5])
-        grp['comments'] = fields[6]
+        grp['comments'] = string.strip(fields[6], '"')
         
         f2 = h5py.File("catalytic-converter-6.jpg.h5", "r") # copy the image dataset in
         img = f2["catalytic-converter-6.jpg"]
