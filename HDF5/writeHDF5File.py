@@ -31,8 +31,6 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         
         image = Image.open(sys.argv[2])                     # read the image file
         grp['photo'] = image								# add the image member to the group
-        print image.size, image.format, image.mode
-        print grp['photo']
         grp['photo'].attrs['CLASS'] = numpy.string_("IMAGE")
         grp['photo'].attrs['IMAGE_VERSION'] = numpy.string_("1.2")
         grp['photo'].attrs['IMAGE_SUBCLASS'] = numpy.string_("IMAGE_TRUECOLOR")
