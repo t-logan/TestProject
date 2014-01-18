@@ -7,15 +7,16 @@ import string
 
 linesIn = 0
 
-if len(sys.argv) != 4:                                      # check number of command line args
-    print "Argument error, need: <output directory> <image file name> <CSV file name>. Quitting."
+if len(sys.argv) != 5:                                      # check number of command line args
+    print "Argument error, need: <output directory> <image file name> <dataset name> <CSV file name>. Quitting."
     raise SystemExit(1)
 else:
     print "Output directory: " + sys.argv[1]                # display output directory name                             
     print "Image file: " + sys.argv[2]                      # display image file name                             
-    print "Input CSV file: " + sys.argv[3]                  # display CSV file name                             
+    print "Dataset name: " + sys.argv[3]                    # display dataset name                             
+    print "Input CSV file: " + sys.argv[4]                  # display CSV file name                             
 
-for line in  open(sys.argv[3]):                             # read the CSV file
+for line in  open(sys.argv[4]):                             # read the CSV file
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
@@ -29,8 +30,8 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         grp['odometer'] = float(fields[5])
         grp['comments'] = string.strip(fields[6], '"')
         
-        f2 = h5py.File(sys.argv[2], "r")                    # copy the image dataset in
-        img = f2["catalytic-converter-6.jpg"]
+        f2 = h5py.File(sys.argv[2], "r")                    # copy the image dataset
+        img = f2[sys.argv[3]]
         f.copy(img, 'catalyticConverterPhoto')
         
         ds = f.create_dataset(fields[0] + "/emissions", (100,), dtype=('a10,f4,f4,f4,f4'))
