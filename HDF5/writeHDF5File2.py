@@ -29,7 +29,7 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         grp['odometer'] = float(fields[5])
         grp['comments'] = string.strip(fields[6], '"')
         
-        f2 = h5py.File("catalytic-converter-6.jpg.h5", "r") # copy the image dataset in
+        f2 = h5py.File(sys.argv[2], "r") # copy the image dataset in
         img = f2["catalytic-converter-6.jpg"]
         f.copy(img, 'catalyticConverterPhoto')
         
