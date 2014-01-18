@@ -3,6 +3,7 @@
 import sys
 import h5py
 import Image
+import numpy
 
 linesIn = 0
 
@@ -32,10 +33,11 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         grp['photo'] = image								# add the image member to the group
         print image.size, image.format, image.mode
         print grp['photo']
-        grp['photo'].attrs['CLASS'] = "IMAGE"
-        grp['photo'].attrs['IMAGE_VERSION'] = "1.2"
-        grp['photo'].attrs['IMAGE_SUBCLASS'] = "IMAGE_TRUECOLOR"
-        grp['photo'].attrs['INTERLACE_MODE'] = "INTERLACE_PIXEL"
+        grp['photo'].attrs['CLASS'] = numpy.string_("IMAGE")
+        grp['photo'].attrs['IMAGE_VERSION'] = numpy.string_("1.2")
+        grp['photo'].attrs['IMAGE_SUBCLASS'] = numpy.string_("IMAGE_TRUECOLOR")
+        grp['photo'].attrs["IMAGE_COLORMODEL"] = numpy.string_("RGB")
+        grp['photo'].attrs['INTERLACE_MODE'] = numpy.string_("INTERLACE_PIXEL")
 
         ds = f.create_dataset(fields[0] + "/emissions", (100,), dtype=('a10,f4,f4,f4,f4'))
         emissionPtr = 0
