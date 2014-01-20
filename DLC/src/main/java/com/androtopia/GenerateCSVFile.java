@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 public class GenerateCSVFile {
 
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"
-			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2\n";
+			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2,SAMPLE_COUNT\n";
 
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
@@ -26,6 +26,7 @@ public class GenerateCSVFile {
 
 	private static String dataPath = "";
 	private static String csvFile = "";
+	private static int numberOfSamples = 0;
 
 	// used to access rows in the emissionData table
 	private static final int EX_HC_LIGHT_DUTY_VEHICLE = 0;
@@ -124,8 +125,10 @@ public class GenerateCSVFile {
 		self.init();
 		self.outFile = new FileWriter(dataPath + csvFile);
 		self.outFile.write(HEADER);
-		for (int i = 0; i < self.numberOfVehicles; i++)
-			self.generate(self.getVariableNumberOfSamples());
+		for (int i = 0; i < self.numberOfVehicles; i++) {
+			numberOfSamples = self.getVariableNumberOfSamples();
+			self.generate(numberOfSamples);
+		}
 		self.outFile.close();
 		out.println("Generation done.");
 	}
@@ -253,7 +256,8 @@ public class GenerateCSVFile {
 		outFile.write(exhaustHC + ",");
 		outFile.write(nonExhaustHC + ",");
 		outFile.write(exhaustCO + ",");
-		outFile.write("" + exhaustNO2);
+		outFile.write(exhaustNO2 + ",");
+		outFile.write("" + numberOfSamples);
 	}
 
 	/**
