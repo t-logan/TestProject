@@ -37,7 +37,7 @@ for line in  open(sys.argv[3]):                             # read the CSV file
         grp['photo'].attrs["IMAGE_COLORMODEL"] = numpy.string_("RGB")
         grp['photo'].attrs['INTERLACE_MODE'] = numpy.string_("INTERLACE_PIXEL")
 
-        ds = f.create_dataset(fields[0] + "/emissions", (100,), dtype=('a10,f4,f4,f4,f4'))
+        ds = f.create_dataset(fields[0] + "/emissions", (int(fields[12]),), dtype=('a10,f4,f4,f4,f4'))
         emissionPtr = 0
     if(linesIn != 1):                                       # skip the header, write the emissions record ...
         ds[emissionPtr:emissionPtr+1] = [(fields[7], float(fields[8]), float(fields[9]), float(fields[10]), float(fields[11]))]
