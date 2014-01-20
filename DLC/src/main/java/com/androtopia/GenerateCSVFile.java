@@ -101,6 +101,7 @@ public class GenerateCSVFile {
 	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
 	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj";
 
+	String emissionsDataFile;
 	FileWriter outFile;
 
 	public GenerateCSVFile() {
@@ -114,22 +115,24 @@ public class GenerateCSVFile {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		String vin;
 		if (args.length != 4)
 			throw new IllegalArgumentException(
-					"Must pass numberOfVehicles, maxSamples, Data Path, and CSV file name on command line.");
+					"Must pass <numberOfVehicles> <maxSamples> <emissions data file name> <output path> on the command line.");
 		GenerateCSVFile self = new GenerateCSVFile();
 		self.numberOfVehicles = Integer.parseInt(args[0]);
 		self.maxSamples = Integer.parseInt(args[1]);
-		self.dataPath = args[2];
-		self.csvFile = args[3];
+		self.emissionsDataFile = args[2];
+		self.dataPath = args[3];
 		self.init();
-		self.outFile = new FileWriter(dataPath + csvFile);
-		self.outFile.write(HEADER);
 		for (int i = 0; i < self.numberOfVehicles; i++) {
+			vin = self.buildVin();
+			self.outFile = new FileWriter(dataPath + vin + ".csv");
+			self.outFile.write(HEADER);
 			numberOfSamples = self.getVariableNumberOfSamples();
-			self.generate(numberOfSamples);
+			self.generate(numberOfSamples, vin);
+			self.outFile.close();
 		}
-		self.outFile.close();
 		out.println("Generation done.");
 	}
 
@@ -139,7 +142,7 @@ public class GenerateCSVFile {
 	 * @throws IOException
 	 */
 	private void init() throws IOException {
-		initEmissionData(dataPath + "table_04_43.csv");
+		initEmissionData(emissionsDataFile);
 		initYearIndexMap();
 		initWmiTable();
 		initModelYearTable();
@@ -153,7 +156,7 @@ public class GenerateCSVFile {
 	 *            the ceiling on the number of emission samples/vehicle.
 	 * @throws IOException
 	 */
-	private void generate(int numberOfSamples) throws IOException {
+	private void generate(int numberOfSamples, String vin) throws IOException {
 		int randomVehicleType = 0;
 		boolean supress = true;
 		for (int i = 0; i < numberOfSamples; i++) {
@@ -162,19 +165,19 @@ public class GenerateCSVFile {
 			else
 				supress = true;
 			randomVehicleType = getRandomVehicleType();
-			writeVehicleData(outFile, randomVehicleType, supress);
+			writeVehicleData(outFile, randomVehicleType, vin, supress);
 			writeEmissionData(outFile, randomVehicleType);
 			outFile.write("\n");
 		}
 	}
 
-	private void writeVehicleData(FileWriter outFile, int randomVehicleType, boolean blank)
+	private void writeVehicleData(FileWriter outFile, int randomVehicleType, String vin, boolean blank)
 			throws IOException {
 		if (blank) {
 			outFile.write("\"\",\"\",\"\",\"\",\"\",\"\",\"\",");
 			return;
 		}
-		outFile.write(buildVin() + ",");
+		outFile.write(vin + ",");
 		outFile.write("\"" + manufacturer + "\",");
 		outFile.write(modelYear + ",");
 		switch (randomVehicleType) {
