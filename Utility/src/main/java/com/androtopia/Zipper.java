@@ -2,22 +2,22 @@ package com.androtopia;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.zip.Adler32;
+import java.util.zip.CheckedInputStream;
 import java.util.zip.CheckedOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Zipper {
-
-	private final int BUFFER = 2048;
 
 	public Zipper() {
 	}
 
 	public void zip(String inputFileName, String outputFileName) {
+		int BUFFER = 2048;
 		try {
 			BufferedInputStream origin = null;
 			FileOutputStream dest = new FileOutputStream(outputFileName);
@@ -40,4 +40,40 @@ public class Zipper {
 			e.printStackTrace();
 		}
 	}
+	
+	// TODO: unzip
+	 public static void main (String argv[]) {
+	      try {
+	         final int BUFFER = 2048;
+	         BufferedOutputStream dest = null;
+	         FileInputStream fis = new 
+		   FileInputStream(argv[0]);
+	         CheckedInputStream checksum = new 
+	           CheckedInputStream(fis, new Adler32());
+	         ZipInputStream zis = new 
+	           ZipInputStream(new 
+	             BufferedInputStream(checksum));
+	         ZipEntry entry;
+	         while((entry = zis.getNextEntry()) != null) {
+	            System.out.println("Extracting: " +entry);
+	            int count;
+	            byte data[] = new byte[BUFFER];
+	            // write the files to the disk
+	            FileOutputStream fos = new 
+	              FileOutputStream(entry.getName());
+	            dest = new BufferedOutputStream(fos, 
+	              BUFFER);
+	            while ((count = zis.read(data, 0, 
+	              BUFFER)) != -1) {
+	               dest.write(data, 0, count);
+	            }
+	            dest.flush();
+	            dest.close();
+	         }
+	         zis.close();
+	         System.out.println("Checksum: "+checksum.getChecksum().getValue());
+	      } catch(Exception e) {
+	         e.printStackTrace();
+	      }
+	   }
 }
