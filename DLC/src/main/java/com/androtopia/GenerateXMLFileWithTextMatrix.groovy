@@ -21,6 +21,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	// inputCSVFile and inputDataPath are passed as a command line parameters
 	private String inputCSVFile = "";
 	private String outputDataPath = "";
+	private int photoCopies = 0;
 
 	public GenerateXMLFileWithTextMatrix() {
 		super();
@@ -128,17 +129,19 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 						emissions.dateTested = tok
 						break
 					case 9:
-						emissions.exhaustHC = Float.parseFloat(tok);
+						emissions.exhaustHC = Float.parseFloat(tok)
 						break
 					case 10:
-						emissions.nonExhaustHC = Float.parseFloat(tok);
+						emissions.nonExhaustHC = Float.parseFloat(tok)
 						break
 					case 11:
-						emissions.exhaustCO = Float.parseFloat(tok);
+						emissions.exhaustCO = Float.parseFloat(tok)
 						break
 					case 12:
-						emissions.exhaustNO2 = Float.parseFloat(tok);
+						emissions.exhaustNO2 = Float.parseFloat(tok)
 						break
+					case 14:
+						photoCopies = Integer.parseInt(tok)
 				}
 				// inject the emissions data into the vehicle information
 			}
@@ -176,7 +179,8 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				oilChangeDistance(v.oilChangeDistance)
 				odometer(v.odometer)
 				comments(v.comments)
-				unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
+				for(int i =0; i < photoCopies; i++)
+					unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
 				v.emissions.each{ e->
 					emission() {
 						dateTested(e.dateTested)
