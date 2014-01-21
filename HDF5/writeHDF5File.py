@@ -47,12 +47,12 @@ def processFile(file):
         f = h5py.File(sys.argv[1] + "\\" + fields[0] + ".hdf5", "w")   # open the output HDF5 File
         
         grp = f.create_group(fields[0])                     # create vehicle group (VIN id)
-        grp['manufacturer'] = fields[1]                     # populate the vehicle group ...
+        grp['manufacturer'] = str.strip(fields[1], '"')     # populate the vehicle group ...
         grp['modelYear'] = int(fields[2])
         grp['vehicleType'] = fields[3]
         grp['oilChangeDistance'] = float(fields[4])
         grp['odometer'] = float(fields[5])
-        grp['comments'] = fields[6]
+        grp['comments'] = str.strip(fields[6], '"')
         
         image = Image.open(sys.argv[2])                     # read the image file
         grp['photo'] = image								# add the image member to the group
