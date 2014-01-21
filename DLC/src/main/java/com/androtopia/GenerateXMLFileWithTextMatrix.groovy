@@ -15,6 +15,8 @@ import org.apache.commons.io.DirectoryWalker
  */
 public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	
+	private int BINARY_IMAGE_SIZE = 114173;
+	
 	private Vehicle vehicle
 	private Emissions emissions
 
@@ -59,12 +61,19 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	protected void handleFile(File file, int depth, Collection results) {
 		if(file.getName().endsWith(".csv")) {
 			generateFiles(file.getAbsolutePath());
+			updateDatabase();
 			System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
-				 ", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" + emissionsSamples + ", photoCopies=" + photoCopies);
+				 ", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" + 
+				 emissionsSamples + ", photoCopies=" + photoCopies +
+				 ", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
 			results.add(file);
 		}
 	}
 
+	private void updateDatabase() {
+	
+	}
+	
 	/**
 	 * Write the XML file by parsing a CSV file containing the data and expressing it as XML.
 	 * @param inputFile the name of the CSV file to read.
