@@ -1,15 +1,11 @@
 package com.androtopia;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.StringTokenizer;
-import static java.lang.System.out;
+import static java.lang.System.out
 
-import org.apache.commons.codec.binary.Base64;
+import java.nio.charset.Charset
+
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.io.DirectoryWalker
 
 /**
  * This is a Groovy program that writes the vehicleEmissions.xml file from CSV input 
@@ -17,13 +13,17 @@ import org.apache.commons.codec.binary.Base64;
  * @author Tim Logan
  *
  */
-public class GenerateXMLFileWithTextMatrix {
+public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 	private String encodedConverterPic
 
 	// inputCSVFile and inputDataPath are passed as a command line parameters
 	private String inputCSVFile = "";
 	private String outputDataPath = "";
+
+	public GenerateXMLFileWithTextMatrix() {
+		super();
+	}
 
 	/**
 	 * Write out an XML file to support Ted's use case of vehicle emissions.
@@ -35,8 +35,22 @@ public class GenerateXMLFileWithTextMatrix {
 			throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
 		self.inputCSVFile = args[0];
 		self.outputDataPath = args[1];
-		self.generateFiles(self.inputCSVFile);
+		//	self.generateFiles(self.inputCSVFile);
+		List results = new ArrayList();
+		File startDirectory = new File("C:\\tmp");
+		self.walk(startDirectory, results);
 		println "Done!"
+	}
+
+	protected boolean handleDirectory(File directory, int depth, Collection results) {
+		return true;
+	}
+
+	protected void handleFile(File file, int depth, Collection results) {
+		if(file.getName().endsWith(".csv")) {
+			generateFiles(file.getAbsolutePath());
+			results.add(file);
+		}
 	}
 
 	/**
@@ -141,10 +155,10 @@ public class GenerateXMLFileWithTextMatrix {
 	 * @param builder the MarkupBuilder used to output XML with Groovy.
 	 */
 	private void emitXml(Vehicle v, groovy.xml.StreamingMarkupBuilder builder) {
-		
+
 		// output XML file
 		FileWriter xmlFile = new FileWriter(new File(outputDataPath + v.vin + ".xml"))
-		
+
 		// encode the catalytic converter picture included in every vehicle entity
 		encodedConverterPic = GenerateXMLFileWithTextMatrix.encodeImage("converter.jpg")
 
@@ -172,15 +186,15 @@ public class GenerateXMLFileWithTextMatrix {
 				}
 			}
 		}
-		
+
 		// write out the XML content
 		xmlFile << builder.bind(vehicleXml)
-		
+
 		// write the final tag and close the file
 		xmlFile.write("</vehicleEmissions>");
 		xmlFile.close()
 	}
-	
+
 	/**
 	 * Write the XML header information and the root tag.
 	 * @param xmlFile
