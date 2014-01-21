@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 public class GenerateCSVFile {
 
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"
-			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2,SAMPLE_COUNT\n";
+			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2,SAMPLE_COUNT,PHOTO_COPIES\n";
 
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
@@ -27,6 +27,8 @@ public class GenerateCSVFile {
 	private static String dataPath = "";
 	private static String csvFile = "";
 	private static int numberOfSamples = 0;
+	private int maxPhotoCopies = 0;
+	private int photoCopies = 0;
 
 	// used to access rows in the emissionData table
 	private static final int EX_HC_LIGHT_DUTY_VEHICLE = 0;
@@ -116,20 +118,22 @@ public class GenerateCSVFile {
 	 */
 	public static void main(String[] args) throws IOException {
 		String vin;
-		if (args.length != 4)
+		if (args.length != 5)
 			throw new IllegalArgumentException(
-					"Must pass <numberOfVehicles> <maxSamples> <emissions data file name> <output path> on the command line.");
+					"Must pass <numberOfVehicles> <maxSamples> <emissions data file name> <output path> <photo copies> on the command line.");
 		GenerateCSVFile self = new GenerateCSVFile();
 		self.numberOfVehicles = Integer.parseInt(args[0]);
 		self.maxSamples = Integer.parseInt(args[1]);
 		self.emissionsDataFile = args[2];
 		self.dataPath = args[3];
+		self.maxPhotoCopies = Integer.parseInt(args[4]);
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
 			self.outFile = new FileWriter(dataPath + vin + ".csv");
 			self.outFile.write(HEADER);
 			numberOfSamples = self.getVariableNumberOfSamples();
+			self.photoCopies = self.getVariableNumberOfPhotos();
 			self.generate(numberOfSamples, vin);
 			self.outFile.close();
 		}
@@ -260,7 +264,8 @@ public class GenerateCSVFile {
 		outFile.write(nonExhaustHC + ",");
 		outFile.write(exhaustCO + ",");
 		outFile.write(exhaustNO2 + ",");
-		outFile.write("" + numberOfSamples);
+		outFile.write(numberOfSamples + ",");
+		outFile.write("" + photoCopies);
 	}
 
 	/**
@@ -453,13 +458,23 @@ public class GenerateCSVFile {
 	}
 
 	/**
-	 * Return a single randomly generated VIN character.
+	 * Return a single randomly generated number of emissions samples.
 	 * 
-	 * @return the character.
+	 * @return the number of samples.
 	 */
 	private int getVariableNumberOfSamples() {
 		// insure that there is at least one
 		return randomGenerator.nextInt(maxSamples) + 1;
+	}
+
+	/**
+	 * Return a single randomly generated number of photo copes.
+	 * 
+	 * @return the number of photos.
+	 */
+	private int getVariableNumberOfPhotos() {
+		// insure that there is at least one
+		return randomGenerator.nextInt(maxPhotoCopies) + 1;
 	}
 
 	private int getModelYearEmissionIndex(int modelYear) {
