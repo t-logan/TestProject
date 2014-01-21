@@ -31,17 +31,16 @@ class DirectoryWalker:
                 self.stack.append(fullname)
             return fullname
         
-if len(sys.argv) != 4:                                      # check number of command line args
-    print "Argument error, need: <output directory> <image file name> <CSV file name>. Quitting."
+if len(sys.argv) != 3:                                      # check number of command line args
+    print "Argument error, need: <output directory> <image file name>. Quitting."
     raise SystemExit(1)
 else:
     print "Output directory: " + sys.argv[1]                # display output directory name                             
     print "Image file: " + sys.argv[2]                      # display image file name                             
-    print "Input CSV file: " + sys.argv[3]                  # display CSV file name 
         
 def processFile(file):
   linesIn = 0
-  for line in  open(file):                             # read the CSV file
+  for line in  open(file):                                  # read the CSV file
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
@@ -69,7 +68,7 @@ def processFile(file):
         ds[emissionPtr:emissionPtr+1] = [(fields[7], float(fields[8]), float(fields[9]), float(fields[10]), float(fields[11]))]
         emissionPtr += 1
                       
-for file in DirectoryWalker(os.path.abspath('c:/tmp')):
+for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # process all the input CSV files
     if(str.find(file, ".csv") != -1):
         processFile(file)
         
