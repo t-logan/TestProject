@@ -54,13 +54,15 @@ def processFile(file):
         grp['odometer'] = float(fields[5])
         grp['comments'] = str.strip(fields[6], '"')
         
-        image = Image.open(sys.argv[2])                     # read the image file
-        grp['photo'] = image								# add the image member to the group
-        grp['photo'].attrs['CLASS'] = numpy.string_("IMAGE")
-        grp['photo'].attrs['IMAGE_VERSION'] = numpy.string_("1.2")
-        grp['photo'].attrs['IMAGE_SUBCLASS'] = numpy.string_("IMAGE_TRUECOLOR")
-        grp['photo'].attrs["IMAGE_COLORMODEL"] = numpy.string_("RGB")
-        grp['photo'].attrs['INTERLACE_MODE'] = numpy.string_("INTERLACE_PIXEL")
+        photoCopies = int(fields[13])
+        for i in range(photoCopies):
+            image = Image.open(sys.argv[2])                 # read the image file
+            grp['photo' + str(i)] = image                            # add the image member to the group
+            grp['photo' + str(i)].attrs['CLASS'] = numpy.string_("IMAGE")
+            grp['photo' + str(i)].attrs['IMAGE_VERSION'] = numpy.string_("1.2")
+            grp['photo' + str(i)].attrs['IMAGE_SUBCLASS'] = numpy.string_("IMAGE_TRUECOLOR")
+            grp['photo' + str(i)].attrs["IMAGE_COLORMODEL"] = numpy.string_("RGB")
+            grp['photo' + str(i)].attrs['INTERLACE_MODE'] = numpy.string_("INTERLACE_PIXEL")
 
         ds = f.create_dataset(fields[0] + "/emissions", (int(fields[12]),), dtype=('a10,f4,f4,f4,f4'))
         emissionPtr = 0
