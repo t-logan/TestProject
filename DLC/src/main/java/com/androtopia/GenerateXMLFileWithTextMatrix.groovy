@@ -14,13 +14,21 @@ import org.apache.commons.io.DirectoryWalker
  *
  */
 public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
+	
+	private Vehicle vehicle
+	private Emissions emissions
 
 	private String encodedConverterPic
 	private Zipper zipper = new Zipper();
+	private long xmlWriteStartTime = 0;
+	private long xmlWriteTime = 0;
+	private long cxmlWriteStartTime = 0;
+	private long cxmlWriteTime = 0;
 
 	// inputCSVFile and inputDataPath are passed as a command line parameters
 	private String inputCSVFile = "";
 	private String outputDataPath = "";
+	private int emissionsSamples = 0;
 	private int photoCopies = 0;
 
 	public GenerateXMLFileWithTextMatrix() {
@@ -51,6 +59,8 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	protected void handleFile(File file, int depth, Collection results) {
 		if(file.getName().endsWith(".csv")) {
 			generateFiles(file.getAbsolutePath());
+			System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
+				 ", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" + emissionsSamples + ", photoCopies=" + photoCopies);
 			results.add(file);
 		}
 	}
@@ -64,12 +74,14 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		groovy.xml.StreamingMarkupBuilder builder = new groovy.xml.StreamingMarkupBuilder()
 		builder.encoding = "UTF-8"
 
-		Vehicle vehicle
-		Emissions emissions
 		boolean isVehicleRec
 		String line
 		int lineCount = 0
 		int tokenCount = 0
+
+		// about to start reading the CSV file
+		xmlWriteStartTime = System.currentTimeMillis();
+
 		FileInputStream fis = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis,
 				Charset.forName("UTF-8")))
@@ -140,6 +152,9 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 					case 12:
 						emissions.exhaustNO2 = Float.parseFloat(tok)
 						break
+					case 13:
+						emissionsSamples = Integer.parseInt(tok)
+						break
 					case 14:
 						photoCopies = Integer.parseInt(tok)
 				}
@@ -164,7 +179,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		FileWriter xmlFile = new FileWriter(new File(outputDataPath + v.vin + ".xml"))
 
 		// encode the catalytic converter picture included in every vehicle entity
-		encodedConverterPic = GenerateXMLFileWithTextMatrix.encodeImage("converter.jpg")
+		encodedConverterPic = GenerateXMLFileWithTextMatrix.encodeImage("catalytic-converter-6.jpg")
 
 		// add reference to the schema
 		genXmlHeader(xmlFile, builder);
@@ -198,7 +213,14 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		// write the final tag and close the file
 		xmlFile.write("</vehicleEmissions>");
 		xmlFile.close()
+
+		// compute times
+		xmlWriteTime = System.currentTimeMillis() - xmlWriteStartTime;
+
+		// time the zip process ...
+		cxmlWriteStartTime = System.currentTimeMillis();
 		zipper.zip(outputDataPath + v.vin + ".xml", outputDataPath + v.vin + ".xmlc");
+		cxmlWriteTime = (System.currentTimeMillis() - cxmlWriteStartTime) + xmlWriteTime;
 	}
 
 	/**
