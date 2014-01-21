@@ -16,6 +16,7 @@ import org.apache.commons.io.DirectoryWalker
 public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 	private String encodedConverterPic
+	private Zipper zipper = new Zipper();
 
 	// inputCSVFile and inputDataPath are passed as a command line parameters
 	private String inputCSVFile = "";
@@ -193,6 +194,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		// write the final tag and close the file
 		xmlFile.write("</vehicleEmissions>");
 		xmlFile.close()
+		zipper.zip(outputDataPath + v.vin + ".xml", outputDataPath + v.vin + ".xmlc");
 	}
 
 	/**
