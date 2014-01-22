@@ -2,7 +2,14 @@ package com.androtopia;
 
 import static java.lang.System.out
 
+import java.io.Console;
 import java.nio.charset.Charset
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
 
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.DirectoryWalker
@@ -14,11 +21,13 @@ import org.apache.commons.io.DirectoryWalker
  *
  */
 public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
-	
+
 	private int BINARY_IMAGE_SIZE = 114173;
-	
+
 	private Vehicle vehicle
 	private Emissions emissions
+	private String user;
+	private String password;
 
 	private String encodedConverterPic
 	private Zipper zipper = new Zipper();
@@ -44,10 +53,16 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	public static void main(String[] args) {
 		GenerateXMLFileWithTextMatrix self = new GenerateXMLFileWithTextMatrix();
 		if(args.size() != 2)
-			throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
+		throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
 		self.inputCSVFile = args[0];
 		self.outputDataPath = args[1];
-		//	self.generateFiles(self.inputCSVFile);
+		
+		Scanner input = new Scanner(System.in)
+		println "Enter userid"
+		self.user = input.nextLine();
+		println "Enter password"
+		self.password = input.nextLine();
+
 		List results = new ArrayList();
 		File startDirectory = new File("C:\\tmp");
 		self.walk(startDirectory, results);
@@ -62,18 +77,50 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		if(file.getName().endsWith(".csv")) {
 			generateFiles(file.getAbsolutePath());
 			updateDatabase();
-			System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
-				 ", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" + 
-				 emissionsSamples + ", photoCopies=" + photoCopies +
-				 ", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
 			results.add(file);
 		}
 	}
 
 	private void updateDatabase() {
-	
+
+		Connection con = null;
+		Statement st = null;
+		ResultSet rs = null;
+		
+		System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
+			", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" +
+			emissionsSamples + ", photoCopies=" + photoCopies +
+			", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
+
+		String url = "jdbc:mysql://localhost:3306/DLC"
+
+		try {
+			con = DriverManager.getConnection(url, user, password);
+			st = con.createStatement();
+			rs = st.executeQuery("SELECT VERSION()");
+
+			if (rs.next()) {
+				System.out.println(rs.getString(1));
+			}
+		} catch (SQLException ex) {
+			println ex.getMessage()
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (st != null) {
+					st.close();
+				}
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException ex) {
+				println ex.getMessage()
+			}
+		}
 	}
-	
+
 	/**
 	 * Write the XML file by parsing a CSV file containing the data and expressing it as XML.
 	 * @param inputFile the name of the CSV file to read.
@@ -93,7 +140,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 		FileInputStream fis = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis,
-				Charset.forName("UTF-8")))
+		Charset.forName("UTF-8")))
 
 		// read the seed file one line at a time
 		while ((line = br.readLine()) != null) {
@@ -101,7 +148,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 			lineCount++
 			// skip header record
 			if(lineCount == 1)
-				continue
+			continue
 			//println line
 			tokenCount = 0
 			emissions = new Emissions()
@@ -111,61 +158,61 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				switch(tokenCount) {
 					// vin
 					case 1:
-						if(tok.equals("\"\""))
-							isVehicleRec = false;
-						else {
-							if(vehicle != null) {
-								emitXml(vehicle, builder)
-							}
-							vehicle = new Vehicle()
-							vehicle.vin = tok
-							isVehicleRec = true;
+					if(tok.equals("\"\""))
+					isVehicleRec = false;
+					else {
+						if(vehicle != null) {
+							emitXml(vehicle, builder)
 						}
-						break
+						vehicle = new Vehicle()
+						vehicle.vin = tok
+						isVehicleRec = true;
+					}
+					break
 					case 2:
-						if(isVehicleRec)
-							vehicle.manufacturer = tok.substring(1, tok.length() - 1)
-						break
+					if(isVehicleRec)
+					vehicle.manufacturer = tok.substring(1, tok.length() - 1)
+					break
 					case 3:
-						if(isVehicleRec)
-							vehicle.modelYear = Integer.parseInt(tok)
-						break
+					if(isVehicleRec)
+					vehicle.modelYear = Integer.parseInt(tok)
+					break
 					case 4:
-						if(isVehicleRec)
-							vehicle.vehicleType = tok
-						break
+					if(isVehicleRec)
+					vehicle.vehicleType = tok
+					break
 					case 5:
-						if(isVehicleRec)
-							vehicle.oilChangeDistance = Float.parseFloat(tok)
-						break
+					if(isVehicleRec)
+					vehicle.oilChangeDistance = Float.parseFloat(tok)
+					break
 					case 6:
-						if(isVehicleRec)
-							vehicle.odometer = Float.parseFloat(tok)
-						break
+					if(isVehicleRec)
+					vehicle.odometer = Float.parseFloat(tok)
+					break
 					case 7:
-						if(isVehicleRec)
-							vehicle.comments = tok.substring(1, tok.length() - 1)
-						break
+					if(isVehicleRec)
+					vehicle.comments = tok.substring(1, tok.length() - 1)
+					break
 					case 8:
-						emissions.dateTested = tok
-						break
+					emissions.dateTested = tok
+					break
 					case 9:
-						emissions.exhaustHC = Float.parseFloat(tok)
-						break
+					emissions.exhaustHC = Float.parseFloat(tok)
+					break
 					case 10:
-						emissions.nonExhaustHC = Float.parseFloat(tok)
-						break
+					emissions.nonExhaustHC = Float.parseFloat(tok)
+					break
 					case 11:
-						emissions.exhaustCO = Float.parseFloat(tok)
-						break
+					emissions.exhaustCO = Float.parseFloat(tok)
+					break
 					case 12:
-						emissions.exhaustNO2 = Float.parseFloat(tok)
-						break
+					emissions.exhaustNO2 = Float.parseFloat(tok)
+					break
 					case 13:
-						emissionsSamples = Integer.parseInt(tok)
-						break
+					emissionsSamples = Integer.parseInt(tok)
+					break
 					case 14:
-						photoCopies = Integer.parseInt(tok)
+					photoCopies = Integer.parseInt(tok)
 				}
 				// inject the emissions data into the vehicle information
 			}
@@ -204,7 +251,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				odometer(v.odometer)
 				comments(v.comments)
 				for(int i =0; i < photoCopies; i++)
-					unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
+				unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
 				v.emissions.each{ e->
 					emission() {
 						dateTested(e.dateTested)
@@ -242,7 +289,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		xmlFile << builder.bind(xmlHeader)
 		// write root tag with schema reference
 		xmlFile.write("<vehicleEmissions xmlns=\"http://www.epa.gov\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-				"xsi:schemaLocation=\"http://www.epa.gov vehicleEmissions.xsd\">");
+		"xsi:schemaLocation=\"http://www.epa.gov vehicleEmissions.xsd\">");
 	}
 
 	/**
@@ -265,7 +312,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		String encodedString = ""
 
 		InputStream imageFile = GenerateXMLFileWithTextMatrix.class.getClassLoader()
-				.getResourceAsStream(inputFile);
+		.getResourceAsStream(inputFile);
 
 		if (imageFile == null) {
 			throw new IOException("Input file '" + inputFile
@@ -293,7 +340,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 		public String toString() {
 			String s = "\nvin=" + vin + ",\nmanufacturer=" + manufacturer + ",\nmodelYear=" + modelYear + ",\nvehicleType=" + vehicleType +
-					",\noilChangeDistance=" + oilChangeDistance + ",\nodometer=" + odometer + ",\ncomments=" + comments
+			",\noilChangeDistance=" + oilChangeDistance + ",\nodometer=" + odometer + ",\ncomments=" + comments
 			for(int i = 0; i < emissions.size(); i++) {
 				s+= emissions.get(i).toString()
 			}
