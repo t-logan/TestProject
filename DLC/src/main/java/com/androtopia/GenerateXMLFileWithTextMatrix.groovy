@@ -23,7 +23,8 @@ import org.apache.commons.io.DirectoryWalker
 public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 	private int BINARY_IMAGE_SIZE = 114173;
-
+	private String url = "jdbc:mysql://localhost:3306/DLC"
+	
 	private Vehicle vehicle
 	private Emissions emissions
 	private String user;
@@ -53,10 +54,10 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	public static void main(String[] args) {
 		GenerateXMLFileWithTextMatrix self = new GenerateXMLFileWithTextMatrix();
 		if(args.size() != 2)
-		throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
+			throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
 		self.inputCSVFile = args[0];
 		self.outputDataPath = args[1];
-		
+
 		Scanner input = new Scanner(System.in)
 		println "Enter userid"
 		self.user = input.nextLine();
@@ -65,6 +66,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 		List results = new ArrayList();
 		File startDirectory = new File("C:\\tmp");
+		println "Running ..."
 		self.walk(startDirectory, results);
 		println "Done!"
 	}
@@ -86,22 +88,26 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
+
+		String xmlSql = "insert into stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
+				vehicle.vin + ".xml\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
+				xmlWriteTime + ")"
+				
+		String cxmlSql = "insert into stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
+				vehicle.vin + ".xmlc\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
+				cxmlWriteTime + ")"
 		
-		System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
-			", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" +
-			emissionsSamples + ", photoCopies=" + photoCopies +
-			", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
-
-		String url = "jdbc:mysql://localhost:3306/DLC"
-
+//		System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
+//				", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" +
+//				emissionsSamples + ", photoCopies=" + photoCopies +
+//				", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
 		try {
 			con = DriverManager.getConnection(url, user, password);
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT VERSION()");
-
-			if (rs.next()) {
-				System.out.println(rs.getString(1));
-			}
+			// record XML stats
+			st.execute(xmlSql);
+			// record CXML stats
+			st.execute(cxmlSql);
 		} catch (SQLException ex) {
 			println ex.getMessage()
 		} finally {
@@ -140,7 +146,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 		FileInputStream fis = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis,
-		Charset.forName("UTF-8")))
+				Charset.forName("UTF-8")))
 
 		// read the seed file one line at a time
 		while ((line = br.readLine()) != null) {
@@ -148,7 +154,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 			lineCount++
 			// skip header record
 			if(lineCount == 1)
-			continue
+				continue
 			//println line
 			tokenCount = 0
 			emissions = new Emissions()
@@ -158,61 +164,61 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				switch(tokenCount) {
 					// vin
 					case 1:
-					if(tok.equals("\"\""))
-					isVehicleRec = false;
-					else {
-						if(vehicle != null) {
-							emitXml(vehicle, builder)
+						if(tok.equals("\"\""))
+							isVehicleRec = false;
+						else {
+							if(vehicle != null) {
+								emitXml(vehicle, builder)
+							}
+							vehicle = new Vehicle()
+							vehicle.vin = tok
+							isVehicleRec = true;
 						}
-						vehicle = new Vehicle()
-						vehicle.vin = tok
-						isVehicleRec = true;
-					}
-					break
+						break
 					case 2:
-					if(isVehicleRec)
-					vehicle.manufacturer = tok.substring(1, tok.length() - 1)
-					break
+						if(isVehicleRec)
+							vehicle.manufacturer = tok.substring(1, tok.length() - 1)
+						break
 					case 3:
-					if(isVehicleRec)
-					vehicle.modelYear = Integer.parseInt(tok)
-					break
+						if(isVehicleRec)
+							vehicle.modelYear = Integer.parseInt(tok)
+						break
 					case 4:
-					if(isVehicleRec)
-					vehicle.vehicleType = tok
-					break
+						if(isVehicleRec)
+							vehicle.vehicleType = tok
+						break
 					case 5:
-					if(isVehicleRec)
-					vehicle.oilChangeDistance = Float.parseFloat(tok)
-					break
+						if(isVehicleRec)
+							vehicle.oilChangeDistance = Float.parseFloat(tok)
+						break
 					case 6:
-					if(isVehicleRec)
-					vehicle.odometer = Float.parseFloat(tok)
-					break
+						if(isVehicleRec)
+							vehicle.odometer = Float.parseFloat(tok)
+						break
 					case 7:
-					if(isVehicleRec)
-					vehicle.comments = tok.substring(1, tok.length() - 1)
-					break
+						if(isVehicleRec)
+							vehicle.comments = tok.substring(1, tok.length() - 1)
+						break
 					case 8:
-					emissions.dateTested = tok
-					break
+						emissions.dateTested = tok
+						break
 					case 9:
-					emissions.exhaustHC = Float.parseFloat(tok)
-					break
+						emissions.exhaustHC = Float.parseFloat(tok)
+						break
 					case 10:
-					emissions.nonExhaustHC = Float.parseFloat(tok)
-					break
+						emissions.nonExhaustHC = Float.parseFloat(tok)
+						break
 					case 11:
-					emissions.exhaustCO = Float.parseFloat(tok)
-					break
+						emissions.exhaustCO = Float.parseFloat(tok)
+						break
 					case 12:
-					emissions.exhaustNO2 = Float.parseFloat(tok)
-					break
+						emissions.exhaustNO2 = Float.parseFloat(tok)
+						break
 					case 13:
-					emissionsSamples = Integer.parseInt(tok)
-					break
+						emissionsSamples = Integer.parseInt(tok)
+						break
 					case 14:
-					photoCopies = Integer.parseInt(tok)
+						photoCopies = Integer.parseInt(tok)
 				}
 				// inject the emissions data into the vehicle information
 			}
@@ -251,7 +257,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				odometer(v.odometer)
 				comments(v.comments)
 				for(int i =0; i < photoCopies; i++)
-				unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
+					unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
 				v.emissions.each{ e->
 					emission() {
 						dateTested(e.dateTested)
@@ -289,7 +295,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		xmlFile << builder.bind(xmlHeader)
 		// write root tag with schema reference
 		xmlFile.write("<vehicleEmissions xmlns=\"http://www.epa.gov\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-		"xsi:schemaLocation=\"http://www.epa.gov vehicleEmissions.xsd\">");
+				"xsi:schemaLocation=\"http://www.epa.gov vehicleEmissions.xsd\">");
 	}
 
 	/**
@@ -312,7 +318,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		String encodedString = ""
 
 		InputStream imageFile = GenerateXMLFileWithTextMatrix.class.getClassLoader()
-		.getResourceAsStream(inputFile);
+				.getResourceAsStream(inputFile);
 
 		if (imageFile == null) {
 			throw new IOException("Input file '" + inputFile
@@ -340,7 +346,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 		public String toString() {
 			String s = "\nvin=" + vin + ",\nmanufacturer=" + manufacturer + ",\nmodelYear=" + modelYear + ",\nvehicleType=" + vehicleType +
-			",\noilChangeDistance=" + oilChangeDistance + ",\nodometer=" + odometer + ",\ncomments=" + comments
+					",\noilChangeDistance=" + oilChangeDistance + ",\nodometer=" + odometer + ",\ncomments=" + comments
 			for(int i = 0; i < emissions.size(); i++) {
 				s+= emissions.get(i).toString()
 			}
