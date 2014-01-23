@@ -5,6 +5,7 @@ import h5py
 import Image
 import numpy
 import os
+import MySQLdb
 
 class DirectoryWalker:
 # a forward iterator that traverses a directory tree
@@ -69,9 +70,15 @@ def processFile(file):
     if(linesIn != 1):                                       # skip the header, write the emissions record ...
         ds[emissionPtr:emissionPtr+1] = [(fields[7], float(fields[8]), float(fields[9]), float(fields[10]), float(fields[11]))]
         emissionPtr += 1
+
+userid = raw_input('Enter User: ')                          # get DB user and password information
+password = raw_input('Enter Password: ')                    # and connect to the DB
+db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
                       
 for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # process all the input CSV files
     if(str.find(file, ".csv") != -1):
         processFile(file)
+        cur = db.cursor() 
+        cur.execute("SELECT * FROM STATS")
         
 print "Done."
