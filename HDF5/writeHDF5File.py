@@ -41,15 +41,13 @@ else:
     print "Image file: " + sys.argv[2]                      # display image file name                             
         
 def processFile(file):
-  global BINARY_IMAGE_SIZE
+  global BINARY_IMAGE_SIZE, photoCopies, emissionsSamples, vin
   BINARY_IMAGE_SIZE = 114173
-  linesIn = 0
-  global photoCopies
   photoCopies = 0
-  global emissionsSamples
   emissionsSamples = 0
-  global vin
   vin = ""
+  
+  linesIn = 0
   for line in  open(file):                                  # read the CSV file
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
