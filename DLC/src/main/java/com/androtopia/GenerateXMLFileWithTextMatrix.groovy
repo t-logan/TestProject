@@ -59,9 +59,9 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		self.outputDataPath = args[1];
 
 		Scanner input = new Scanner(System.in)
-		println "Enter userid"
+		println "Enter User: "
 		self.user = input.nextLine();
-		println "Enter password"
+		println "Enter Password: "
 		self.password = input.nextLine();
 
 		List results = new ArrayList();

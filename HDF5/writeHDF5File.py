@@ -86,6 +86,7 @@ def processFile(file):
 userid = raw_input('Enter User: ')                          # get DB user and password information
 password = raw_input('Enter Password: ')                    # and connect to the DB ...
 db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
+print "Running ..."
                       
 for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # process all the input CSV files
     if(str.find(file, ".csv") != -1):
