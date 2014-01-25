@@ -18,17 +18,17 @@ public class GetFileSizes extends DirectoryWalker {
 
 	private String url = "jdbc:mysql://localhost:3306/DLC";
 	private Connection con = null;
+	private String targetDir;
 
 	private String user;
 	private String password;
 
 	public static void main(String[] args) throws IOException, SQLException {
 		GetFileSizes self = new GetFileSizes();
-		if (args.length != 0)
+		if (args.length != 1)
 			throw new IllegalArgumentException(
-					"Must pass input file name and output XML file data path on command line.");
-		// self.inputCSVFile = args[0];
-		// self.outputDataPath = args[1];
+					"Must pass target directory on the command line.");
+		self.targetDir = args[0];
 
 		Scanner input = new Scanner(System.in);
 		System.out.println("Enter User: ");
@@ -39,7 +39,7 @@ public class GetFileSizes extends DirectoryWalker {
 				self.password);
 
 		List results = new ArrayList();
-		File startDirectory = new File("C:\\tmp");
+		File startDirectory = new File(self.targetDir);
 		System.out.println("Running ...");
 		self.walk(startDirectory, results);
 		System.out.println("Done!");
