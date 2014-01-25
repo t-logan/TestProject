@@ -20,7 +20,7 @@ import org.apache.commons.io.DirectoryWalker
  * @author Tim Logan
  *
  */
-public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
+public class WriteXMLFiles extends DirectoryWalker {
 
 	private int BINARY_IMAGE_SIZE = 114173;
 	private String url = "jdbc:mysql://localhost:3306/DLC"
@@ -44,7 +44,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	private int emissionsSamples = 0;
 	private int photoCopies = 0;
 
-	public GenerateXMLFileWithTextMatrix() {
+	public WriteXMLFiles() {
 		super();
 	}
 
@@ -53,7 +53,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	 * @param args the dataPath is passed as a parameter.
 	 */
 	public static void main(String[] args) {
-		GenerateXMLFileWithTextMatrix self = new GenerateXMLFileWithTextMatrix();
+		WriteXMLFiles self = new WriteXMLFiles();
 		if(args.size() != 2)
 			throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
 		self.inputCSVFile = args[0];
@@ -242,7 +242,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		FileWriter xmlFile = new FileWriter(new File(outputDataPath + v.vin + ".xml"))
 
 		// encode the catalytic converter picture included in every vehicle entity
-		encodedConverterPic = GenerateXMLFileWithTextMatrix.encodeImage("catalytic-converter-6.jpg")
+		encodedConverterPic = WriteXMLFiles.encodeImage("catalytic-converter-6.jpg")
 
 		// add reference to the schema
 		genXmlHeader(xmlFile, builder);
@@ -318,7 +318,7 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		byte[] encoded = new byte[bufferSize]
 		String encodedString = ""
 
-		InputStream imageFile = GenerateXMLFileWithTextMatrix.class.getClassLoader()
+		InputStream imageFile = WriteXMLFiles.class.getClassLoader()
 				.getResourceAsStream(inputFile);
 
 		if (imageFile == null) {

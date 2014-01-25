@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-public class GenerateCSVFile {
+public class GenerateCSVFiles {
 
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"
 			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2,SAMPLE_COUNT,PHOTO_COPIES\n";
@@ -106,7 +106,7 @@ public class GenerateCSVFile {
 	String emissionsDataFile;
 	FileWriter outFile;
 
-	public GenerateCSVFile() {
+	public GenerateCSVFiles() {
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class GenerateCSVFile {
 		if (args.length != 5)
 			throw new IllegalArgumentException(
 					"Must pass <numberOfVehicles> <maxSamples> <emissions data file name> <output path> <photo copies> on the command line.");
-		GenerateCSVFile self = new GenerateCSVFile();
+		GenerateCSVFiles self = new GenerateCSVFiles();
 		self.numberOfVehicles = Integer.parseInt(args[0]);
 		self.maxSamples = Integer.parseInt(args[1]);
 		self.emissionsDataFile = args[2];
