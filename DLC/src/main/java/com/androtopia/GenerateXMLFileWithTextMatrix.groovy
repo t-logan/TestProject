@@ -24,7 +24,8 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 
 	private int BINARY_IMAGE_SIZE = 114173;
 	private String url = "jdbc:mysql://localhost:3306/DLC"
-	
+	private Connection con = null;
+
 	private Vehicle vehicle
 	private Emissions emissions
 	private String user;
@@ -63,11 +64,17 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 		self.user = input.nextLine();
 		println "Enter Password: "
 		self.password = input.nextLine();
-
+		self.con = DriverManager.getConnection(self.url, self.user, self.password);
+		
 		List results = new ArrayList();
 		File startDirectory = new File("C:\\tmp");
 		println "Running ..."
 		self.walk(startDirectory, results);
+		
+		if (self.con != null) {
+			self.con.close();
+		}
+
 		println "Done!"
 	}
 
@@ -84,8 +91,6 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 	}
 
 	private void updateDatabase() {
-
-		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
 
@@ -102,7 +107,6 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 //				emissionsSamples + ", photoCopies=" + photoCopies +
 //				", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
 		try {
-			con = DriverManager.getConnection(url, user, password);
 			st = con.createStatement();
 			// record XML stats
 			st.execute(xmlSql);
@@ -117,9 +121,6 @@ public class GenerateXMLFileWithTextMatrix extends DirectoryWalker {
 				}
 				if (st != null) {
 					st.close();
-				}
-				if (con != null) {
-					con.close();
 				}
 			} catch (SQLException ex) {
 				println ex.getMessage()
