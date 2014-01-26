@@ -43,21 +43,25 @@ else:
         
 def processFile(file):
     f = h5py.File(file, "r")                                # open the input HDF5 File
+    
+    # PROCESS IMAGES AND EMISSIONS DATA ...
+    
     f.close()
-  
-userid = raw_input('Enter User: ')                          # get DB user and password information
-password = raw_input('Enter Password: ')                    # and connect to the DB ...
-db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
-print "Running ..."
+
+if __name__ == '__main__':  
+    userid = raw_input('Enter User: ')                          # get DB user and password information
+    password = raw_input('Enter Password: ')                    # and connect to the DB ...
+    db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
+    print "Running ..."
                       
-for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # read all the HDF5 files
-    if(str.find(file, ".hdf5") != -1):
-        startTime = int(round(time.time() * 1000))
-        processFile(file)
-        readTime = int(round(time.time() * 1000)) - startTime
-        sql = "update stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,"c:\\tmp\\") + "\""
-        cur = db.cursor()                                   # record statistics
-        cur.execute(sql)
-        cur.execute("commit")
+    for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # read all the HDF5 files
+        if(str.find(file, ".hdf5") != -1):
+            startTime = int(round(time.time() * 1000))
+            processFile(file)
+            readTime = int(round(time.time() * 1000)) - startTime
+            sql = "update stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,"c:\\tmp\\") + "\""
+            cur = db.cursor()                                   # record statistics
+            cur.execute(sql)
+            cur.execute("commit")
         
-print "Done."
+    print "Done."
