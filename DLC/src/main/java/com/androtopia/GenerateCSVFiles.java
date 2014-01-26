@@ -527,9 +527,15 @@ public class GenerateCSVFiles {
 
 	private String getRandomTestDate() {
 		String date = "" + modelYear + "-";
-		date += randomGenerator.nextInt(13);
+		int month = randomGenerator.nextInt(13);
+		if(month == 0)
+			month = 1;
+		date += month;
 		date += "-";
-		date += randomGenerator.nextInt(29);
+		int day = randomGenerator.nextInt(29);
+		if(day == 0)
+			day = 1;
+		date += day;
 		return date;
 	}
 }
