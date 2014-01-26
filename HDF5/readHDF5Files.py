@@ -2,7 +2,7 @@
 
 import sys
 import h5py
-import Image
+from PIL import Image
 import numpy
 import os
 import time
