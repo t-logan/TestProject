@@ -36,7 +36,7 @@ public class StatsToCSVFile {
 		FileWriter fw = new FileWriter(file.getAbsoluteFile());
 		BufferedWriter bw = new BufferedWriter(fw);
 
-		String header = "fileName,numberOfPhotos,emissionsSamples,sizeOnDiskInBytes,binaryBytes,"
+		String header = "fileName,fileExt,numberOfPhotos,emissionsSamples,sizeOnDiskInBytes,binaryBytes,"
 				+ "timeToCreateInMilliseconds,timeToReadInMilliseconds\n";
 		bw.write(header);
 
@@ -57,10 +57,13 @@ public class StatsToCSVFile {
 						.getLong("timeToCreateInMilliseconds");
 				Long timeToReadInMilliseconds = rs
 						.getLong("timeToReadInMilliseconds");
-				bw.write(String.format("%s,%d,%d,%d,%d,%d,%d\n", fileName,
-						numberOfPhotos, emissionsSamples, sizeOnDiskInBytes,
-						binaryBytes, timeToCreateInMilliseconds,
-						timeToReadInMilliseconds));
+				bw.write(String.format(
+						"%s,%s,%d,%d,%d,%d,%d,%d\n",
+						fileName,
+						fileName.substring(fileName.indexOf(".") + 1,
+								fileName.length()), numberOfPhotos,
+						emissionsSamples, sizeOnDiskInBytes, binaryBytes,
+						timeToCreateInMilliseconds, timeToReadInMilliseconds));
 			}
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
@@ -76,9 +79,9 @@ public class StatsToCSVFile {
 				System.out.println(ex.getMessage());
 			}
 		}
-		
+
 		bw.close();
-		
+
 		System.out.println("Done!");
 	}
 }
