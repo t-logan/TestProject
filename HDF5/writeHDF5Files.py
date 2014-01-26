@@ -3,7 +3,7 @@
 import sys
 import h5py
 import Image
-import numpy
+import numpy as np
 import os
 import time
 import MySQLdb
@@ -65,16 +65,17 @@ def processFile(file):
         photoCopies = int(fields[13])
         for i in range(photoCopies):
             image = Image.open(sys.argv[2])                 # read the image file
-            grp['photo' + str(i)] = image                            # add the image member to the group
-            grp['photo' + str(i)].attrs['CLASS'] = numpy.string_("IMAGE")
-            grp['photo' + str(i)].attrs['IMAGE_VERSION'] = numpy.string_("1.2")
-            grp['photo' + str(i)].attrs['IMAGE_SUBCLASS'] = numpy.string_("IMAGE_TRUECOLOR")
-            grp['photo' + str(i)].attrs["IMAGE_COLORMODEL"] = numpy.string_("RGB")
-            grp['photo' + str(i)].attrs['INTERLACE_MODE'] = numpy.string_("INTERLACE_PIXEL")
+            grp['photo' + str(i)] = image                   # add the image member to the group
+            grp['photo' + str(i)].attrs['CLASS'] = np.string_("IMAGE")
+            grp['photo' + str(i)].attrs['IMAGE_VERSION'] = np.string_("1.2")
+            grp['photo' + str(i)].attrs['IMAGE_SUBCLASS'] = np.string_("IMAGE_TRUECOLOR")
+            grp['photo' + str(i)].attrs["IMAGE_COLORMODEL"] = np.string_("RGB")
+            grp['photo' + str(i)].attrs['INTERLACE_MODE'] = np.string_("INTERLACE_PIXEL")
 
-        vin = fields[0]
+        vin = fields[0]                                     # preallocate compound array
         emissionsSamples = fields[12]
-        ds = f.create_dataset(fields[0] + "/emissions", (int(emissionsSamples),), dtype=('a10,f4,f4,f4,f4'))
+        dt = ([("Date", np.dtype('a10')), ("Ex HC", np.dtype('f4')), ("Non-Ex HC", np.dtype('f4')), ("Ex CO", np.dtype('f4')), ("Ex NO2", np.dtype('f4'))])
+        ds = f.create_dataset(fields[0] + "/emissions", (int(emissionsSamples),), dtype=dt)
         emissionPtr = 0
         
     if(linesIn != 1):                                       # skip the header, write the emissions record ...
