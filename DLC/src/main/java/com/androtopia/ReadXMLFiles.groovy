@@ -91,12 +91,12 @@ public class ReadXMLFiles extends DirectoryWalker {
 		// about to start reading the CSV file
 		xmlReadStartTime = System.currentTimeMillis();
 
-		// compute times
-		xmlReadTime = System.currentTimeMillis() - xmlReadStartTime;
-
 		// parse the file
 		def file = new File(inputFile)
 		def emissions = new XmlParser().parse(file)
+		
+		// compute times
+		xmlReadTime = System.currentTimeMillis() - xmlReadStartTime;
 
 		// time the unzip process ...
 		cxmlReadStartTime = System.currentTimeMillis();
