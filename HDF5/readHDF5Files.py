@@ -44,13 +44,26 @@ else:
 def processFile(file):
     f = h5py.File(file, "r")                                # open the input HDF5 File
     
-    # PROCESS IMAGES AND EMISSIONS DATA ...
+    # OPEN DATASETS ...
+    grpName = file.lstrip('c:\\tmp\\')
+    grpName = grpName.rstrip('.hdf5')
+    grp = f[grpName]                                        # group name is the VIN number
+    photoCount = len(grp) - 7                               # there are seven non-photo datasets in the VIN # group
     
+    comments = grp['comments']                              # get the 7 non-photo datasets
+    emissions = grp['emissions']
+    manufacturer = grp['manufacturer']
+    modelYear = grp['modelYear']
+    odometer = grp['odometer']
+    oilChangeDistance = grp['oilChangeDistance']
+    vehicleType = grp['vehicleType']
+    for i in range(photoCount):                             # read every photo
+        photo = grp['photo' + str(i)]
     f.close()
 
 if __name__ == '__main__':  
-    userid = raw_input('Enter User: ')                          # get DB user and password information
-    password = raw_input('Enter Password: ')                    # and connect to the DB ...
+    userid = raw_input('Enter User: ')                      # get DB user and password information
+    password = raw_input('Enter Password: ')                # and connect to the DB ...
     db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
     print "Running ..."
                       
