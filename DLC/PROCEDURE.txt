@@ -32,17 +32,22 @@ The results are stored in c:\tmp\stats.csv
 PROGRAM PARAMETERS
 
 GetFileSizes:
+one param= path to dir holding xml and hdf5 files
 
 c:\tmp
 
 WriteXMLFiles:
+first param= not used.
+second param= output dir holding csv, xml, xmlc, and hdf5 files and stat csv file.
 
 C:/Users/tlogan/Documents/GitHub/TestProject/DLC/src/main/dat/seed.csv c:/tmp/
 
-writeHDFFiles:
+writeHDF5Files:
+first param= output dir
+second param= ph
 
 \tmp catalytic-converter-6.jpg.h5  catalytic-converter-6.jpg C:/Users/tlogan/Documents/GitHub/TestProject/DLC/src/main/dat/seed.csv
 
-readHDFFiles:
+readHDF5Files:
 
 \tmp  catalytic-converter-6.jpg 
