@@ -28,3 +28,21 @@ Example:
 10) Run StatsToCSVFile.java
 
 The results are stored in c:\tmp\stats.csv
+
+PROGRAM PARAMETERS
+
+GetFileSizes:
+
+c:\tmp
+
+WriteXMLFiles:
+
+C:/Users/tlogan/Documents/GitHub/TestProject/DLC/src/main/dat/seed.csv c:/tmp/
+
+writeHDFFiles:
+
+\tmp catalytic-converter-6.jpg.h5  catalytic-converter-6.jpg C:/Users/tlogan/Documents/GitHub/TestProject/DLC/src/main/dat/seed.csv
+
+readHDFFiles:
+
+\tmp  catalytic-converter-6.jpg 
