@@ -26,9 +26,9 @@ public class GenerateCSVFiles {
 
 	private static String dataPath = "";
 	private static String csvFile = "";
-	private static int numberOfSamples = 0;
+	private static long numberOfSamples = 0;
 	private int maxPhotoCopies = 0;
-	private int photoCopies = 0;
+	private long photoCopies = 0;
 
 	// used to access rows in the emissionData table
 	private static final int EX_HC_LIGHT_DUTY_VEHICLE = 0;
@@ -69,7 +69,8 @@ public class GenerateCSVFiles {
 	private static Map<String, Integer> modelYearTable = new HashMap<String, Integer>();
 
 	private Random randomGenerator = new Random();
-	private RandomGaussianGenerator normalDistGenerator = new RandomGaussianGenerator();
+	private RandomGaussianGenerator samplesRandGenerator = null;
+	private RandomGaussianGenerator photosRandGenerator = null;
 
 	private int modelYear = 0;
 	private String dateTested;
@@ -124,9 +125,11 @@ public class GenerateCSVFiles {
 		GenerateCSVFiles self = new GenerateCSVFiles();
 		self.numberOfVehicles = Integer.parseInt(args[0]);
 		self.maxSamples = Integer.parseInt(args[1]);
+		self.samplesRandGenerator = new RandomGaussianGenerator(self.maxSamples / 2, (self.maxSamples / 2) * .2);
 		self.emissionsDataFile = args[2];
 		self.dataPath = args[3];
 		self.maxPhotoCopies = Integer.parseInt(args[4]);
+		self.photosRandGenerator = new RandomGaussianGenerator(self.maxPhotoCopies / 2, (self.maxPhotoCopies / 2) * .2);
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
@@ -160,7 +163,7 @@ public class GenerateCSVFiles {
 	 *            the ceiling on the number of emission samples/vehicle.
 	 * @throws IOException
 	 */
-	private void generate(int numberOfSamples, String vin) throws IOException {
+	private void generate(long numberOfSamples, String vin) throws IOException {
 		int randomVehicleType = 0;
 		boolean supress = true;
 		for (int i = 0; i < numberOfSamples; i++) {
@@ -205,6 +208,7 @@ public class GenerateCSVFiles {
 
 	private void writeEmissionData(FileWriter outFile, int randomVehicleType) throws IOException {
 		int yearIndex = getModelYearEmissionIndex(modelYear);
+		RandomGaussianGenerator normalDistGenerator = new RandomGaussianGenerator();
 		exhaustHC = 0;
 		nonExhaustHC = 0;
 		exhaustCO = 0;
@@ -462,9 +466,13 @@ public class GenerateCSVFiles {
 	 * 
 	 * @return the number of samples.
 	 */
-	private int getVariableNumberOfSamples() {
+	private long getVariableNumberOfSamples() {
 		// insure that there is at least one
-		return randomGenerator.nextInt(maxSamples) + 1;
+		Double x = samplesRandGenerator.getNextGaussian();
+		if(x < 1)
+			return 1L;
+		else
+			return Math.round(x);
 	}
 
 	/**
@@ -472,9 +480,13 @@ public class GenerateCSVFiles {
 	 * 
 	 * @return the number of photos.
 	 */
-	private int getVariableNumberOfPhotos() {
+	private long getVariableNumberOfPhotos() {
 		// insure that there is at least one
-		return randomGenerator.nextInt(maxPhotoCopies) + 1;
+		Double x = photosRandGenerator.getNextGaussian();
+		if(x < 1)
+			return 1L;
+		else
+			return Math.round(x);
 	}
 
 	private int getModelYearEmissionIndex(int modelYear) {
