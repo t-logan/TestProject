@@ -1,3 +1,5 @@
+-- THIS IS A NEW CHANGE
+
 select * from stats;
 
 delete from stats;
