@@ -4,29 +4,35 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Scanner;
+import java.util.Properties;
 
 public class StatsToCSVFile {
 
 	public static void main(String[] args) throws IOException, SQLException {
 
-		String url = "jdbc:mysql://localhost:3306/DLC";
+		String url = null;
 		Connection con = null;
 		String user;
 		String password;
 		Statement st = null;
 		ResultSet rs = null;
 
-		Scanner input = new Scanner(System.in);
-		System.out.println("Enter User: ");
-		user = input.nextLine();
-		System.out.println("Enter Password: ");
-		password = input.nextLine();
+		// load properties
+		Properties props = new Properties();
+		ClassLoader cl = GenerateCSVFiles.class.getClassLoader();
+		InputStream is = cl.getResourceAsStream("dlc.properties");
+		props.load(is);
+		is.close();
+
+		url = props.getProperty("db.url");
+		user = props.getProperty("db.user");
+		password = props.getProperty("db.pw");
 		con = DriverManager.getConnection(url, user, password);
 
 		System.out.println("Running ...");
