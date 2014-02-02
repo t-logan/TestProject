@@ -6,12 +6,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.IllegalFormatWidthException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -22,10 +24,9 @@ public class GenerateCSVFiles {
 
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
-	private int maxSamples = 10;
+	private int meanSamples = 10;
 
 	private static String dataPath = "";
-	private static String csvFile = "";
 	private static long numberOfSamples = 0;
 	private int maxPhotoCopies = 0;
 	private long photoCopies = 0;
@@ -80,29 +81,28 @@ public class GenerateCSVFiles {
 	private double nonExhaustHC;
 	private double exhaustCO;
 	private double exhaustNO2;
-	
-	private static final String COMMENT = 
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789" +
-	"realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj";
+
+	private static final String COMMENT = "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "Fluxum flap dum dum. Foo bar zany somethingnew any words will do. Just trying to make some 123456789"
+			+ "realistic text to plug into the comment field. Llijihgph wpokrepoj slkaligihe; lkjslijlie jsill. jjj";
 
 	String emissionsDataFile;
 	FileWriter outFile;
@@ -119,17 +119,24 @@ public class GenerateCSVFiles {
 	 */
 	public static void main(String[] args) throws IOException {
 		String vin;
-		if (args.length != 5)
-			throw new IllegalArgumentException(
-					"Must pass <numberOfVehicles> <maxSamples> <emissions data file name> <output path> <photo copies> on the command line.");
+
+		// load properties
+		Properties props = new Properties();
+		ClassLoader cl = GenerateCSVFiles.class.getClassLoader();
+		InputStream is = cl.getResourceAsStream("dlc.properties");
+		props.load(is);
+		is.close();
+
 		GenerateCSVFiles self = new GenerateCSVFiles();
-		self.numberOfVehicles = Integer.parseInt(args[0]);
-		self.maxSamples = Integer.parseInt(args[1]);
-		self.samplesRandGenerator = new RandomGaussianGenerator(self.maxSamples / 2, (self.maxSamples / 2) * .2);
-		self.emissionsDataFile = args[2];
-		self.dataPath = args[3];
-		self.maxPhotoCopies = Integer.parseInt(args[4]);
-		self.photosRandGenerator = new RandomGaussianGenerator(self.maxPhotoCopies / 2, (self.maxPhotoCopies / 2) * .2);
+		self.numberOfVehicles = Integer.parseInt(props.getProperty("file.count"));
+		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
+		self.samplesRandGenerator = new RandomGaussianGenerator(
+				self.meanSamples / 2, (self.meanSamples / 2) * .2);
+		self.emissionsDataFile = props.getProperty("emissions.table");
+		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
+		self.maxPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
+		self.photosRandGenerator = new RandomGaussianGenerator(
+				self.maxPhotoCopies / 2, (self.maxPhotoCopies / 2) * .2);
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
@@ -178,8 +185,8 @@ public class GenerateCSVFiles {
 		}
 	}
 
-	private void writeVehicleData(FileWriter outFile, int randomVehicleType, String vin, boolean blank)
-			throws IOException {
+	private void writeVehicleData(FileWriter outFile, int randomVehicleType,
+			String vin, boolean blank) throws IOException {
 		if (blank) {
 			outFile.write("\"\",\"\",\"\",\"\",\"\",\"\",\"\",");
 			return;
@@ -203,10 +210,11 @@ public class GenerateCSVFiles {
 		outFile.write(vehicleType + ",");
 		outFile.write(getRandomOilChangeDistance() + ",");
 		outFile.write(getRandomOdometerReading() + ",");
-		outFile.write(getRandomComment() +",");
+		outFile.write(getRandomComment() + ",");
 	}
 
-	private void writeEmissionData(FileWriter outFile, int randomVehicleType) throws IOException {
+	private void writeEmissionData(FileWriter outFile, int randomVehicleType)
+			throws IOException {
 		int yearIndex = getModelYearEmissionIndex(modelYear);
 		RandomGaussianGenerator normalDistGenerator = new RandomGaussianGenerator();
 		exhaustHC = 0;
@@ -454,7 +462,7 @@ public class GenerateCSVFiles {
 		// insure that there is at least one
 		return randomGenerator.nextInt(150000);
 	}
-	
+
 	private String getRandomComment() {
 		String comment = "\"";
 		comment += COMMENT.substring(0, randomGenerator.nextInt(2000));
@@ -469,7 +477,7 @@ public class GenerateCSVFiles {
 	private long getVariableNumberOfSamples() {
 		// insure that there is at least one
 		Double x = samplesRandGenerator.getNextGaussian();
-		if(x < 1)
+		if (x < 1)
 			return 1L;
 		else
 			return Math.round(x);
@@ -483,7 +491,7 @@ public class GenerateCSVFiles {
 	private long getVariableNumberOfPhotos() {
 		// insure that there is at least one
 		Double x = photosRandGenerator.getNextGaussian();
-		if(x < 1)
+		if (x < 1)
 			return 1L;
 		else
 			return Math.round(x);
@@ -540,12 +548,12 @@ public class GenerateCSVFiles {
 	private String getRandomTestDate() {
 		String date = "" + modelYear + "-";
 		int month = randomGenerator.nextInt(13);
-		if(month == 0)
+		if (month == 0)
 			month = 1;
 		date += month;
 		date += "-";
 		int day = randomGenerator.nextInt(29);
-		if(day == 0)
+		if (day == 0)
 			day = 1;
 		date += day;
 		return date;
