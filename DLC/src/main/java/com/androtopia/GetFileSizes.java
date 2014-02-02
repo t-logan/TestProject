@@ -2,6 +2,7 @@ package com.androtopia;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,13 +11,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Properties;
 
 import org.apache.commons.io.DirectoryWalker;
 
 public class GetFileSizes extends DirectoryWalker {
 
-	private String url = "jdbc:mysql://localhost:3306/DLC";
+	private String url = null;
 	private Connection con = null;
 	private String targetDir;
 
@@ -25,16 +26,19 @@ public class GetFileSizes extends DirectoryWalker {
 
 	public static void main(String[] args) throws IOException, SQLException {
 		GetFileSizes self = new GetFileSizes();
-		if (args.length != 1)
-			throw new IllegalArgumentException(
-					"Must pass target directory on the command line.");
-		self.targetDir = args[0];
 
-		Scanner input = new Scanner(System.in);
-		System.out.println("Enter User: ");
-		self.user = input.nextLine();
-		System.out.println("Enter Password: ");
-		self.password = input.nextLine();
+		// load properties
+		Properties props = new Properties();
+		ClassLoader cl = GenerateCSVFiles.class.getClassLoader();
+		InputStream is = cl.getResourceAsStream("dlc.properties");
+		props.load(is);
+		is.close();
+
+		self.targetDir = props.getProperty("target.dir");
+
+		self.url = props.getProperty("db.url");
+		self.user = props.getProperty("db.user");
+		self.password = props.getProperty("db.pw");
 		self.con = DriverManager.getConnection(self.url, self.user,
 				self.password);
 
