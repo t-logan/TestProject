@@ -23,8 +23,8 @@ import org.apache.commons.io.DirectoryWalker
 public class WriteXMLFiles extends DirectoryWalker {
 
 	private int BINARY_IMAGE_SIZE = 114173;
-	private String url = "jdbc:mysql://localhost:3306/DLC"
-	private Connection con = null;
+	private String url = null
+	private Connection con = null
 
 	private Vehicle vehicle
 	private Emissions emissions
@@ -38,8 +38,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 	private long cxmlWriteStartTime = 0;
 	private long cxmlWriteTime = 0;
 
-	// inputCSVFile and inputDataPath are passed as a command line parameters
-	private String inputCSVFile = "";
 	private String outputDataPath = "";
 	private int emissionsSamples = 0;
 	private int photoCopies = 0;
@@ -54,17 +52,21 @@ public class WriteXMLFiles extends DirectoryWalker {
 	 */
 	public static void main(String[] args) {
 		WriteXMLFiles self = new WriteXMLFiles();
-		if(args.size() != 2)
-			throw new IllegalArgumentException("Must pass input file name and output XML file data path on command line.");
-		self.inputCSVFile = args[0];
-		self.outputDataPath = args[1];
 
-		Scanner input = new Scanner(System.in)
-		println "Enter User: "
-		self.user = input.nextLine();
-		println "Enter Password: "
-		self.password = input.nextLine();
-		self.con = DriverManager.getConnection(self.url, self.user, self.password);
+		// load properties
+		Properties props = new Properties();
+		ClassLoader cl = GenerateCSVFiles.class.getClassLoader();
+		InputStream is = cl.getResourceAsStream("dlc.properties");
+		props.load(is);
+		is.close();
+		
+		self.outputDataPath = props.getProperty("target.dir");
+		
+		self.url = props.getProperty("db.url");
+		self.user = props.getProperty("db.user");
+		self.password = props.getProperty("db.pw");
+		self.con = DriverManager.getConnection(self.url, self.user,
+				self.password);
 		
 		List results = new ArrayList();
 		File startDirectory = new File("C:\\tmp");
