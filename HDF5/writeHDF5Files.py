@@ -7,6 +7,7 @@ import numpy as np
 import os
 import time
 import MySQLdb
+import ConfigParser
 
 class DirectoryWalker:
 # a forward iterator that traverses a directory tree
@@ -32,14 +33,7 @@ class DirectoryWalker:
             if os.path.isdir(fullname) and not os.path.islink(fullname):
                 self.stack.append(fullname)
             return fullname
-        
-if len(sys.argv) != 3:                                      # check number of command line args
-    print "Argument error, need: <output directory> <image file name>. Quitting."
-    raise SystemExit(1)
-else:
-    print "Output directory: " + sys.argv[1]                # display output directory name                             
-    print "Image file: " + sys.argv[2]                      # display image file name                             
-        
+                
 def processFile(file):
   global BINARY_IMAGE_SIZE, photoCopies, emissionsSamples, vin
   BINARY_IMAGE_SIZE = 114173
@@ -52,7 +46,7 @@ def processFile(file):
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
-        f = h5py.File(sys.argv[1] + "\\" + fields[0] + ".hdf5", "w")   # open the output HDF5 File
+        f = h5py.File(targetDir + "\\" + fields[0] + ".hdf5", "w")   # open the output HDF5 File
         
         grp = f.create_group(fields[0])                     # create vehicle group (VIN id)
         grp['manufacturer'] = str.strip(fields[1], '"')     # populate the vehicle group ...
@@ -64,7 +58,7 @@ def processFile(file):
         
         photoCopies = int(fields[13])
         for i in range(photoCopies):
-            image = Image.open(sys.argv[2])                 # read the image file
+            image = Image.open(imageFile)                 # read the image file
             grp['photo' + str(i)] = image                   # add the image member to the group
             grp['photo' + str(i)].attrs['CLASS'] = np.string_("IMAGE")
             grp['photo' + str(i)].attrs['IMAGE_VERSION'] = np.string_("1.2")
@@ -83,12 +77,20 @@ def processFile(file):
         emissionPtr += 1
 
 if __name__ == '__main__':    
-    userid = raw_input('Enter User: ')                          # get DB user and password information
-    password = raw_input('Enter Password: ')                    # and connect to the DB ...
-    db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
+    config = ConfigParser.ConfigParser()                    # get configuration
+    config.read("hdf5.ini")
+
+    targetDir = config.get("misc", "targetdir")
+    imageFile = config.get("misc", "image")
+    
+    host = config.get("db", "host")                         # get DB config information
+    userid = config.get("db", "userid")                      
+    password = config.get("db", "password")        
+    database = config.get("db", "database")        
+    db = MySQLdb.connect(host=host, user=userid, passwd=password, db=database)
     print "Running ..."
                       
-    for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # process all the input CSV files
+    for file in DirectoryWalker(os.path.abspath(targetDir)):     # process all the input CSV files
         if(str.find(file, ".csv") != -1):
             startTime = int(round(time.time() * 1000))
             processFile(file)
