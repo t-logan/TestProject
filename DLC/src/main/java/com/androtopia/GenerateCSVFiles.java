@@ -131,12 +131,12 @@ public class GenerateCSVFiles {
 		self.numberOfVehicles = Integer.parseInt(props.getProperty("file.count"));
 		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
 		self.samplesRandGenerator = new RandomGaussianGenerator(
-				self.meanSamples / 2, (self.meanSamples / 2) * .2);
+				self.meanSamples, self.meanSamples * .2);
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
 		self.maxPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
 		self.photosRandGenerator = new RandomGaussianGenerator(
-				self.maxPhotoCopies / 2, (self.maxPhotoCopies / 2) * .2);
+				self.maxPhotoCopies, self.maxPhotoCopies * .2);
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
