@@ -8,6 +8,7 @@ import os
 import time
 import MySQLdb
 import string
+import ConfigParser
 
 class DirectoryWalker:
 # a forward iterator that traverses a directory tree
@@ -34,19 +35,14 @@ class DirectoryWalker:
                 self.stack.append(fullname)
             return fullname
         
-if len(sys.argv) != 3:                                      # check number of command line args
-    print "Argument error, need: <output directory> <image file name>. Quitting."
-    raise SystemExit(1)
-else:
-    print "Output directory: " + sys.argv[1]                # display output directory name                             
-    print "Image file: " + sys.argv[2]                      # display image file name                             
-        
 def processFile(file):
     f = h5py.File(file, "r")                                # open the input HDF5 File
     
     # OPEN DATASETS ...
-    grpName = file.lstrip('c:\\tmp\\')
+    grpName = file.lstrip(targetDir)
     grpName = grpName.rstrip('.hdf5')
+    if(len(grpName) == 16):                                  # see if a trailing 5 was stripped from the VIN number (corner case) ...
+        grpName = grpName + ""
     grp = f[grpName]                                        # group name is the VIN number
     photoCount = len(grp) - 7                               # there are seven non-photo datasets in the VIN # group
     
@@ -62,17 +58,24 @@ def processFile(file):
     f.close()
 
 if __name__ == '__main__':  
-    userid = raw_input('Enter User: ')                      # get DB user and password information
-    password = raw_input('Enter Password: ')                # and connect to the DB ...
-    db = MySQLdb.connect(host="localhost", user=userid, passwd=password, db="DLC")
+    config = ConfigParser.ConfigParser()                    # get configuration
+    config.read("hdf5.ini")
+
+    targetDir = config.get("misc", "targetdir")
+    
+    host = config.get("db", "host")                         # get DB config information
+    userid = config.get("db", "userid")                      
+    password = config.get("db", "password")        
+    database = config.get("db", "database")        
+    db = MySQLdb.connect(host=host, user=userid, passwd=password, db=database)
     print "Running ..."
                       
-    for file in DirectoryWalker(os.path.abspath('c:/tmp')):     # read all the HDF5 files
+    for file in DirectoryWalker(os.path.abspath(targetDir)):     # read all the HDF5 files
         if(str.find(file, ".hdf5") != -1):
             startTime = int(round(time.time() * 1000))
             processFile(file)
             readTime = int(round(time.time() * 1000)) - startTime
-            sql = "update stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,"c:\\tmp\\") + "\""
+            sql = "update stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,targetDir) + "\""
             cur = db.cursor()                                   # record statistics
             cur.execute(sql)
             cur.execute("commit")
