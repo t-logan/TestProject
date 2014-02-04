@@ -1,54 +1,18 @@
 XML vs. HDF5 Run Procedure
 ==========================
 
-1) Edit the /src/main/java/dlc.properties file as necessary (example below):
+1) Edit the DLC/src/main/java/dlc.properties file as necessary.
 
----- begin ----
-# characteristics of the files to generate
-file.count = 10
-mean.samples = 10
-mean.photos = 10
-target.dir = c:/tmp/
+2) Edit the /HDF5/hdf5.ini file as necessary.
 
-# database parameters
-db.url = jdbc:mysql://localhost:3306/DLC
-db.user = <your user>
-db.pw = <your password>
+3) Export runnable jar files for GetFileSizes, ReadXMLFiles, StatsToCSVFile, and WriteXMLFiles into the DLC/run directory.
+   Do this by right-clicking on DLC and selecting Export ...
+   The run configurations are used to create executable jar files with all the dependencies included.
 
-image = catalytic-converter-6.jpg
-emissions.table = C:\\Users\\tlogan\\Documents\\GitHub\\TestProject\\DLC\\src\\main\\dat\\table_04_43.csv
----- end ----
+4) Empty the {target.dir} directory.
 
-2) Edit the /HDF5/hdf5.ini file as necessary (example below):
+5) Delete all entries in the stats table in the DLC database.
 
----- begin ----
-[db]
-host: localhost
-database: DLC
-userid: <your user>
-password: <your password>
-
-[misc]
-image: catalytic-converter-6.jpg
-targetdir: c:\\tmp\\
----- end ----
-
-3) Empty the {target.dir} directory (c:\tmp in the examples above).
-
-4) Delete all entries in the stats table in the DLC database
-
-5) Run GenerateCSVFiles.java
-
-6) Run WriteXMLFiles.groovy
-
-7) Run WriteHDF5Files.py
-
-8) Run GetFileSizes.java
-
-9) Run ReadXMLFiles.groovy
-
-10) Run ReadHDF5Files.py
-
-11) Run StatsToCSVFile.java
+6) Bring up a DOS prompt. Run dlc.bat in the DLC/run directory to execute all programs.
 
 The results are stored in {target.dir}\stats.csv
