@@ -43,6 +43,10 @@ def processFile(file):
     grpName = grpName.rstrip('.hdf5')
     if(len(grpName) == 16):                                 # see if a trailing 5 was stripped from the VIN number (corner case) ...
         grpName = grpName + "5"
+    if(len(grpName) == 15):                                
+        grpName = grpName + "55"
+    if(len(grpName) == 14):
+        grpName = grpName + "555"
     grp = f[grpName]                                        # group name is the VIN number
     photoCount = len(grp) - 7                               # there are seven non-photo datasets in the VIN # group
     
