@@ -244,7 +244,8 @@ public class WriteXMLFiles extends DirectoryWalker {
 		FileWriter xmlFile = new FileWriter(new File(outputDataPath + v.vin + ".xml"))
 
 		// encode the catalytic converter picture included in every vehicle entity
-		encodedConverterPic = WriteXMLFiles.encodeImage("catalytic-converter-6.jpg")
+		// ENCODE EVERY TIME
+//		encodedConverterPic = WriteXMLFiles.encodeImage("catalytic-converter-6.jpg")
 
 		// add reference to the schema
 		genXmlHeader(xmlFile, builder);
@@ -260,7 +261,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 				odometer(v.odometer)
 				comments(v.comments)
 				for(int i =0; i < photoCopies; i++)
-					unescaped << "<photo><![CDATA[" + encodedConverterPic + "]]></photo>"
+					unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("catalytic-converter-6.jpg") + "]]></photo>"
 				v.emissions.each{ e->
 					emission() {
 						dateTested(e.dateTested)
