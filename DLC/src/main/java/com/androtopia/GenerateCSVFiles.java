@@ -469,8 +469,12 @@ public class GenerateCSVFiles {
 	 * @return the number of samples.
 	 */
 	private int getVariableNumberOfSamples() {
+		// samples suppressed?
+		if(maxSamples == 0)
+			return 0;
+		
 		// insure that there is at least one
-		int x = randomGenerator.nextInt(maxSamples);
+		int x = randomGenerator.nextInt(maxSamples + 1);
 		if (x < 1)
 			return 1;
 		else
@@ -483,8 +487,12 @@ public class GenerateCSVFiles {
 	 * @return the number of photos.
 	 */
 	private int getVariableNumberOfPhotos() {
+		// photos suppressed?
+		if(maxPhotoCopies == 0)
+			return 0;
+		
 		// insure that there is at least one
-		int x =  randomGenerator.nextInt(maxPhotoCopies);
+		int x =  randomGenerator.nextInt(maxPhotoCopies + 1);
 		if (x < 1)
 			return 1;
 		else
