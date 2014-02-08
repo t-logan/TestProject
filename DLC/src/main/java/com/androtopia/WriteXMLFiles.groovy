@@ -151,7 +151,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis,
 				Charset.forName("UTF-8")))
 
-		// read the seed file one line at a time
+		// read the CSV file one line at a time
 		while ((line = br.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line)
 			lineCount++
@@ -220,10 +220,11 @@ public class WriteXMLFiles extends DirectoryWalker {
 					case 13:
 						emissionsSamples = Integer.parseInt(tok)
 						break
-					case 14:
+					case 14: 
 						photoCopies = Integer.parseInt(tok)
 				}
 				// inject the emissions data into the vehicle information
+				
 			}
 			vehicle.emissions.add(emissions)
 		}

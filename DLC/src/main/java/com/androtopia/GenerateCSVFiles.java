@@ -17,6 +17,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+
 public class GenerateCSVFiles {
 
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"
@@ -126,7 +128,8 @@ public class GenerateCSVFiles {
 		is.close();
 
 		GenerateCSVFiles self = new GenerateCSVFiles();
-		self.numberOfVehicles = Integer.parseInt(props.getProperty("file.count"));
+		self.numberOfVehicles = Integer.parseInt(props
+				.getProperty("file.count"));
 		self.maxSamples = Integer.parseInt(props.getProperty("max.samples"));
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
@@ -174,7 +177,13 @@ public class GenerateCSVFiles {
 				supress = true;
 			randomVehicleType = getRandomVehicleType();
 			writeVehicleData(outFile, randomVehicleType, vin, supress);
-			writeEmissionData(outFile, randomVehicleType);
+			// supress emissions, if requested
+			if (maxSamples == 0) {
+				outFile.write("0,0,0,0,0,0,");
+				outFile.write("" + photoCopies);
+			} else {
+				writeEmissionData(outFile, randomVehicleType);
+			}
 			outFile.write("\n");
 		}
 	}
@@ -470,9 +479,9 @@ public class GenerateCSVFiles {
 	 */
 	private int getVariableNumberOfSamples() {
 		// samples suppressed?
-		if(maxSamples == 0)
-			return 0;
-		
+		if (maxSamples == 0)
+			return 1;
+
 		// insure that there is at least one
 		int x = randomGenerator.nextInt(maxSamples + 1);
 		if (x < 1)
@@ -488,11 +497,11 @@ public class GenerateCSVFiles {
 	 */
 	private int getVariableNumberOfPhotos() {
 		// photos suppressed?
-		if(maxPhotoCopies == 0)
+		if (maxPhotoCopies == 0)
 			return 0;
-		
+
 		// insure that there is at least one
-		int x =  randomGenerator.nextInt(maxPhotoCopies + 1);
+		int x = randomGenerator.nextInt(maxPhotoCopies + 1);
 		if (x < 1)
 			return 1;
 		else
