@@ -24,7 +24,7 @@ public class GenerateCSVFiles {
 
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
-	private int meanSamples = 10;
+	private int maxSamples = 10;
 
 	private static String dataPath = "";
 	private static long numberOfSamples = 0;
@@ -70,8 +70,6 @@ public class GenerateCSVFiles {
 	private static Map<String, Integer> modelYearTable = new HashMap<String, Integer>();
 
 	private Random randomGenerator = new Random();
-	private RandomGaussianGenerator samplesRandGenerator = null;
-	private RandomGaussianGenerator photosRandGenerator = null;
 
 	private int modelYear = 0;
 	private String dateTested;
@@ -129,14 +127,10 @@ public class GenerateCSVFiles {
 
 		GenerateCSVFiles self = new GenerateCSVFiles();
 		self.numberOfVehicles = Integer.parseInt(props.getProperty("file.count"));
-		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
-		self.samplesRandGenerator = new RandomGaussianGenerator(
-				self.meanSamples, self.meanSamples * .6);
+		self.maxSamples = Integer.parseInt(props.getProperty("max.samples"));
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
-		self.maxPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
-		self.photosRandGenerator = new RandomGaussianGenerator(
-				self.maxPhotoCopies, self.maxPhotoCopies * .6);
+		self.maxPhotoCopies = Integer.parseInt(props.getProperty("max.photos"));
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
@@ -474,13 +468,13 @@ public class GenerateCSVFiles {
 	 * 
 	 * @return the number of samples.
 	 */
-	private long getVariableNumberOfSamples() {
+	private int getVariableNumberOfSamples() {
 		// insure that there is at least one
-		Double x = samplesRandGenerator.getNextGaussian();
+		int x = randomGenerator.nextInt(maxSamples);
 		if (x < 1)
-			return 1L;
+			return 1;
 		else
-			return Math.round(x);
+			return x;
 	}
 
 	/**
@@ -488,13 +482,13 @@ public class GenerateCSVFiles {
 	 * 
 	 * @return the number of photos.
 	 */
-	private long getVariableNumberOfPhotos() {
+	private int getVariableNumberOfPhotos() {
 		// insure that there is at least one
-		Double x = photosRandGenerator.getNextGaussian();
+		int x =  randomGenerator.nextInt(maxPhotoCopies);
 		if (x < 1)
-			return 1L;
+			return 1;
 		else
-			return Math.round(x);
+			return x;
 	}
 
 	private int getModelYearEmissionIndex(int modelYear) {
