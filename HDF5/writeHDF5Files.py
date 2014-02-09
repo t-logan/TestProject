@@ -57,14 +57,24 @@ def processFile(file):
         grp['comments'] = str.strip(fields[6], '"')
         
         photoCopies = int(fields[13])
-        for i in range(photoCopies):
-            image = Image.open(imageFile)                 # read the image file
-            grp['photo' + str(i)] = image                   # add the image member to the group
-            grp['photo' + str(i)].attrs['CLASS'] = np.string_("IMAGE")
-            grp['photo' + str(i)].attrs['IMAGE_VERSION'] = np.string_("1.2")
-            grp['photo' + str(i)].attrs['IMAGE_SUBCLASS'] = np.string_("IMAGE_TRUECOLOR")
-            grp['photo' + str(i)].attrs["IMAGE_COLORMODEL"] = np.string_("RGB")
-            grp['photo' + str(i)].attrs['INTERLACE_MODE'] = np.string_("INTERLACE_PIXEL")
+        if(opaqueImage == "0"):
+            # write as image
+            for i in range(photoCopies):
+                image = Image.open(imageFile)               # read the image file
+                grp['photo' + str(i)] = image               # add the image member to the group
+                grp['photo' + str(i)].attrs['CLASS'] = np.string_("IMAGE")
+                grp['photo' + str(i)].attrs['IMAGE_VERSION'] = np.string_("1.2")
+                grp['photo' + str(i)].attrs['IMAGE_SUBCLASS'] = np.string_("IMAGE_TRUECOLOR")
+                grp['photo' + str(i)].attrs["IMAGE_COLORMODEL"] = np.string_("RGB")
+                grp['photo' + str(i)].attrs['INTERLACE_MODE'] = np.string_("INTERLACE_PIXEL")
+        else:
+            # write as opaque binary data
+            dtOpaque = np.dtype('V' + str(BINARY_IMAGE_SIZE))
+            for i in range(photoCopies):
+                with open(imageFile, "rb") as f2:
+                    imageBytes = f2.read(BINARY_IMAGE_SIZE)
+                    opd = f.create_dataset(('photo' + str(i)), (BINARY_IMAGE_SIZE,), dtype=dtOpaque)
+                    opd = imageBytes
 
         vin = fields[0]                                     # preallocate compound array
         emissionsSamples = fields[12]
@@ -82,6 +92,7 @@ if __name__ == '__main__':
 
     targetDir = config.get("misc", "targetdir")
     imageFile = config.get("misc", "image")
+    opaqueImage = config.get("misc", "opaque")
     
     host = config.get("db", "host")                         # get DB config information
     userid = config.get("db", "userid")                      
