@@ -26,11 +26,13 @@ public class GenerateCSVFiles {
 
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
-	private int maxSamples = 10;
+	private int meanSamples = 0;
+	private float varSamples = 0;
+	private int meanPhotoCopies = 0;
+	private float varPhotoCopies = 0;
 
 	private static String dataPath = "";
 	private static long numberOfSamples = 0;
-	private int maxPhotoCopies = 0;
 	private long photoCopies = 0;
 
 	// used to access rows in the emissionData table
@@ -72,6 +74,8 @@ public class GenerateCSVFiles {
 	private static Map<String, Integer> modelYearTable = new HashMap<String, Integer>();
 
 	private Random randomGenerator = new Random();
+	private RandomGaussianGenerator samplesRandGenerator = null;
+	private RandomGaussianGenerator photosRandGenerator = null;
 
 	private int modelYear = 0;
 	private String dateTested;
@@ -130,10 +134,16 @@ public class GenerateCSVFiles {
 		GenerateCSVFiles self = new GenerateCSVFiles();
 		self.numberOfVehicles = Integer.parseInt(props
 				.getProperty("file.count"));
-		self.maxSamples = Integer.parseInt(props.getProperty("max.samples"));
+		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
+		self.varSamples = Float.parseFloat(props.getProperty("var.samples"));
+		self.samplesRandGenerator = new RandomGaussianGenerator(
+				self.meanSamples, (self.varSamples * self.varSamples));
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
-		self.maxPhotoCopies = Integer.parseInt(props.getProperty("max.photos"));
+		self.meanPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
+		self.varPhotoCopies = Float.parseFloat(props.getProperty("var.photos"));
+		self.photosRandGenerator = new RandomGaussianGenerator(
+				self.meanPhotoCopies, (self.varPhotoCopies * self.varPhotoCopies));
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
@@ -178,7 +188,7 @@ public class GenerateCSVFiles {
 			randomVehicleType = getRandomVehicleType();
 			writeVehicleData(outFile, randomVehicleType, vin, supress);
 			// supress emissions, if requested
-			if (maxSamples == 0) {
+			if (meanSamples == 0) {
 				outFile.write("0,0,0,0,0,0,");
 				outFile.write("" + photoCopies);
 			} else {
@@ -477,35 +487,35 @@ public class GenerateCSVFiles {
 	 * 
 	 * @return the number of samples.
 	 */
-	private int getVariableNumberOfSamples() {
+	private long getVariableNumberOfSamples() {
 		// samples suppressed?
-		if (maxSamples == 0)
-			return 1;
+		if (meanSamples == 0)
+			return 0;
 
+		Double x = samplesRandGenerator.getNextGaussian();
 		// insure that there is at least one
-		int x = randomGenerator.nextInt(maxSamples + 1);
 		if (x < 1)
-			return 1;
+			return 1L;
 		else
-			return x;
+			return Math.round(x);
 	}
-
+	
 	/**
 	 * Return a single randomly generated number of photo copes.
 	 * 
 	 * @return the number of photos.
 	 */
-	private int getVariableNumberOfPhotos() {
+	private long getVariableNumberOfPhotos() {
 		// photos suppressed?
-		if (maxPhotoCopies == 0)
+		if (meanPhotoCopies == 0)
 			return 0;
 
+		Double x = photosRandGenerator.getNextGaussian();
 		// insure that there is at least one
-		int x = randomGenerator.nextInt(maxPhotoCopies + 1);
 		if (x < 1)
-			return 1;
+			return 1L;
 		else
-			return x;
+			return Math.round(x);
 	}
 
 	private int getModelYearEmissionIndex(int modelYear) {
