@@ -490,7 +490,7 @@ public class GenerateCSVFiles {
 	private long getVariableNumberOfSamples() {
 		// samples suppressed?
 		if (meanSamples == 0)
-			return 0;
+			return 1L;
 
 		Double x = samplesRandGenerator.getNextGaussian();
 		// insure that there is at least one
