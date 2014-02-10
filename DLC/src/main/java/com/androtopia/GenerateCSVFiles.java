@@ -27,9 +27,9 @@ public class GenerateCSVFiles {
 	// default variables that control the volume of output
 	private int numberOfVehicles = 100;
 	private int meanSamples = 0;
-	private float varSamples = 0;
+	private float sdSamples = 0;
 	private int meanPhotoCopies = 0;
-	private float varPhotoCopies = 0;
+	private float sdPhotoCopies = 0;
 
 	private static String dataPath = "";
 	private static long numberOfSamples = 0;
@@ -135,15 +135,15 @@ public class GenerateCSVFiles {
 		self.numberOfVehicles = Integer.parseInt(props
 				.getProperty("file.count"));
 		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
-		self.varSamples = Float.parseFloat(props.getProperty("var.samples"));
+		self.sdSamples = Float.parseFloat(props.getProperty("sd.samples"));
 		self.samplesRandGenerator = new RandomGaussianGenerator(
-				self.meanSamples, (self.varSamples * self.varSamples));
+				self.meanSamples, (self.sdSamples * self.sdSamples));
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
 		self.meanPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
-		self.varPhotoCopies = Float.parseFloat(props.getProperty("var.photos"));
+		self.sdPhotoCopies = Float.parseFloat(props.getProperty("sd.photos"));
 		self.photosRandGenerator = new RandomGaussianGenerator(
-				self.meanPhotoCopies, (self.varPhotoCopies * self.varPhotoCopies));
+				self.meanPhotoCopies, (self.sdPhotoCopies * self.sdPhotoCopies));
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
