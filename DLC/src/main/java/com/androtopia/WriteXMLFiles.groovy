@@ -25,6 +25,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	private int BINARY_IMAGE_SIZE = 114173;
 	private String url = null
 	private Connection con = null
+	private int fileCount = 0;
 
 	private Vehicle vehicle
 	private Emissions emissions
@@ -143,6 +144,8 @@ public class WriteXMLFiles extends DirectoryWalker {
 		String line
 		int lineCount = 0
 		int tokenCount = 0
+		
+		println inputFile + ": " + ++fileCount
 
 		// about to start reading the CSV file
 		xmlWriteStartTime = System.currentTimeMillis();
