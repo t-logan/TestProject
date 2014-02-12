@@ -107,7 +107,7 @@ public class ReadXMLFiles extends DirectoryWalker {
 		zipper.unzip(inputFile + "c");
 		cxmlReadTime = (System.currentTimeMillis() - cxmlReadStartTime) + xmlReadTime;
 
-		xmlFileName = inputFile.substring(inputFile.lastIndexOf('\\') + 1)
+		xmlFileName = inputFile.substring(inputFile.lastIndexOf('/') + 1)
 		cxmlFileName = xmlFileName + "c"
 		updateDatabase(xmlFileName, cxmlFileName);
 	}
@@ -117,7 +117,6 @@ public class ReadXMLFiles extends DirectoryWalker {
 		ResultSet rs = null;
 		
 		String xmlSql = "update Stats set timeToReadInMilliseconds = " + xmlReadTime + " where fileName = \"" + xmlFileName + "\""
-
 		String cxmlSql = "update Stats set timeToReadInMilliseconds = " + cxmlReadTime + " where fileName = \"" + cxmlFileName + "\""
 		try {
 			st = con.createStatement();

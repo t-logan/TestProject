@@ -79,7 +79,7 @@ if __name__ == '__main__':
             startTime = int(round(time.time() * 1000))
             processFile(file)
             readTime = int(round(time.time() * 1000)) - startTime
-            sql = "update stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,targetDir) + "\""
+            sql = "update Stats set timeToReadInMilliseconds = " + str(readTime) + " where fileName = \"" + string.lstrip(file,targetDir) + "\""
             cur = db.cursor()                                   # record statistics
             cur.execute(sql)
             cur.execute("commit")
