@@ -70,7 +70,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 				self.password);
 		
 		List results = new ArrayList();
-		File startDirectory = new File("C:\\tmp");
+		File startDirectory = new File(props.getProperty("target.dir"));
 		println "Running ..."
 		self.walk(startDirectory, results);
 		
@@ -97,18 +97,13 @@ public class WriteXMLFiles extends DirectoryWalker {
 		Statement st = null;
 		ResultSet rs = null;
 
-		String xmlSql = "insert into stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
+		String xmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
 				vehicle.vin + ".xml\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
 				xmlWriteTime + ")"
 				
-		String cxmlSql = "insert into stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
+		String cxmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
 				vehicle.vin + ".xmlc\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
 				cxmlWriteTime + ")"
-		
-//		System.out.println(vehicle.vin + ": xmlWriteTime=" + xmlWriteTime + ", cxmlWriteTime=" + cxmlWriteTime +
-//				", diff=" + (cxmlWriteTime - xmlWriteTime) + ", emsissionsSamples=" +
-//				emissionsSamples + ", photoCopies=" + photoCopies +
-//				", binary=" + (BINARY_IMAGE_SIZE * photoCopies));
 		try {
 			st = con.createStatement();
 			// record XML stats
