@@ -1,8 +1,8 @@
 -- THIS IS A NEW CHANGE
 
-select * from stats;
+select * from Stats;
 
-delete from stats;
+delete from Stats;
 
 select fileName, numberOfPhotos, emissionsSamples, sizeOnDiskInBytes, binaryBytes, timeToCreateInMilliseconds, timeToReadInMilliseconds from stats;
 
