@@ -46,7 +46,7 @@ def processFile(file):
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
-        f = h5py.File(targetDir + "\\" + fields[0] + ".hdf5", "w")   # open the output HDF5 File
+        f = h5py.File(targetDir + fields[0] + ".hdf5", "w")   # open the output HDF5 File
         
         grp = f.create_group(fields[0])                     # create vehicle group (VIN id)
         grp['manufacturer'] = str.strip(fields[1], '"')     # populate the vehicle group ...
@@ -103,10 +103,11 @@ if __name__ == '__main__':
                       
     for file in DirectoryWalker(os.path.abspath(targetDir)):     # process all the input CSV files
         if(str.find(file, ".csv") != -1):
+            print file
             startTime = int(round(time.time() * 1000))
             processFile(file)
             writeTime = int(round(time.time() * 1000)) - startTime
-            sql = "insert into stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" + \
+            sql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" + \
                 vin + ".hdf5\"," + str(photoCopies) + "," + emissionsSamples + "," + str((BINARY_IMAGE_SIZE * photoCopies)) + "," + \
                 str(writeTime) + ")"
             cur = db.cursor()                                   # record statistics
