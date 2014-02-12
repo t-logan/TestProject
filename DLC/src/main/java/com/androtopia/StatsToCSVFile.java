@@ -37,7 +37,7 @@ public class StatsToCSVFile {
 
 		System.out.println("Running ...");
 
-		File file = new File("c:/tmp/stats.csv");
+		File file = new File(props.getProperty("target.dir") + "stats.csv");
 		file.createNewFile();
 		FileWriter fw = new FileWriter(file.getAbsoluteFile());
 		BufferedWriter bw = new BufferedWriter(fw);
@@ -47,7 +47,7 @@ public class StatsToCSVFile {
 		bw.write(header);
 
 		String sql = "select fileName, numberOfPhotos, emissionsSamples, sizeOnDiskInBytes, binaryBytes, "
-				+ "timeToCreateInMilliseconds, timeToReadInMilliseconds from stats";
+				+ "timeToCreateInMilliseconds, timeToReadInMilliseconds from Stats";
 
 		try {
 			st = con.createStatement();

@@ -116,9 +116,9 @@ public class ReadXMLFiles extends DirectoryWalker {
 		Statement st = null;
 		ResultSet rs = null;
 		
-		String xmlSql = "update stats set timeToReadInMilliseconds = " + xmlReadTime + " where fileName = \"" + xmlFileName + "\""
+		String xmlSql = "update Stats set timeToReadInMilliseconds = " + xmlReadTime + " where fileName = \"" + xmlFileName + "\""
 
-		String cxmlSql = "update stats set timeToReadInMilliseconds = " + cxmlReadTime + " where fileName = \"" + cxmlFileName + "\""
+		String cxmlSql = "update Stats set timeToReadInMilliseconds = " + cxmlReadTime + " where fileName = \"" + cxmlFileName + "\""
 		try {
 			st = con.createStatement();
 			// record XML stats
