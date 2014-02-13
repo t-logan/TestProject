@@ -137,13 +137,13 @@ public class GenerateCSVFiles {
 		self.meanSamples = Integer.parseInt(props.getProperty("mean.samples"));
 		self.sdSamples = Float.parseFloat(props.getProperty("sd.samples"));
 		self.samplesRandGenerator = new RandomGaussianGenerator(
-				self.meanSamples, (self.sdSamples * self.sdSamples));
+				self.meanSamples, self.sdSamples);
 		self.emissionsDataFile = props.getProperty("emissions.table");
 		GenerateCSVFiles.dataPath = props.getProperty("target.dir");
 		self.meanPhotoCopies = Integer.parseInt(props.getProperty("mean.photos"));
 		self.sdPhotoCopies = Float.parseFloat(props.getProperty("sd.photos"));
 		self.photosRandGenerator = new RandomGaussianGenerator(
-				self.meanPhotoCopies, (self.sdPhotoCopies * self.sdPhotoCopies));
+				self.meanPhotoCopies, self.sdPhotoCopies);
 		self.init();
 		for (int i = 0; i < self.numberOfVehicles; i++) {
 			vin = self.buildVin();
@@ -236,43 +236,43 @@ public class GenerateCSVFiles {
 		exhaustNO2 = 0;
 		switch (randomVehicleType) {
 		case LIGHT_DUTY_VEHICLE:
-			exhaustHC = normalDistGenerator.getNextGaussian(
+			exhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_HC_LIGHT_DUTY_VEHICLE][yearIndex], .3);
-			nonExhaustHC = normalDistGenerator.getNextGaussian(
+			nonExhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[NONEX_HC_LIGHT_DUTY_VEHICLE][yearIndex], .3);
-			exhaustCO = normalDistGenerator.getNextGaussian(
+			exhaustCO = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_CO_LIGHT_DUTY_VEHICLE][yearIndex], 2);
-			exhaustNO2 = normalDistGenerator.getNextGaussian(
+			exhaustNO2 = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_NO2_LIGHT_DUTY_VEHICLE][yearIndex], .5);
 			break;
 		case LIGHT_DUTY_TRUCK:
-			exhaustHC = normalDistGenerator.getNextGaussian(
+			exhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_HC_LIGHT_DUTY_TRUCK][yearIndex], .3);
-			nonExhaustHC = normalDistGenerator.getNextGaussian(
+			nonExhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[NONEX_HC_LIGHT_DUTY_TRUCK][yearIndex], .3);
-			exhaustCO = normalDistGenerator.getNextGaussian(
+			exhaustCO = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_CO_LIGHT_DUTY_TRUCK][yearIndex], 2);
-			exhaustNO2 = normalDistGenerator.getNextGaussian(
+			exhaustNO2 = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_NO2_LIGHT_DUTY_TRUCK][yearIndex], .5);
 			break;
 		case HEAVY_DUTY_VEHICLE:
-			exhaustHC = normalDistGenerator.getNextGaussian(
+			exhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_HC_HEAVY_DUTY_VEHICLE][yearIndex], .3);
-			nonExhaustHC = normalDistGenerator.getNextGaussian(
+			nonExhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[NONEX_HC_HEAVY_DUTY_VEHICLE][yearIndex], .3);
-			exhaustCO = normalDistGenerator.getNextGaussian(
+			exhaustCO = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_CO_HEAVY_DUTY_VEHICLE][yearIndex], 2);
-			exhaustNO2 = normalDistGenerator.getNextGaussian(
+			exhaustNO2 = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_NO2_HEAVY_DUTY_VEHICLE][yearIndex], .5);
 			break;
 		case MOTORCYCLE:
-			exhaustHC = normalDistGenerator.getNextGaussian(
+			exhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_HC_MOTORCYCLE][yearIndex], 0);
-			nonExhaustHC = normalDistGenerator.getNextGaussian(
+			nonExhaustHC = normalDistGenerator.getNextScaledGaussian(
 					emissionData[NONEX_HC_MOTORCYCLE][yearIndex], 0);
-			exhaustCO = normalDistGenerator.getNextGaussian(
+			exhaustCO = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_CO_MOTORCYCLE][yearIndex], 0);
-			exhaustNO2 = normalDistGenerator.getNextGaussian(
+			exhaustNO2 = normalDistGenerator.getNextScaledGaussian(
 					emissionData[EX_NO2_MOTORCYCLE][yearIndex], 0);
 		}
 		dateTested = getRandomTestDate();
@@ -492,7 +492,7 @@ public class GenerateCSVFiles {
 		if (meanSamples == 0)
 			return 1L;
 
-		Double x = samplesRandGenerator.getNextGaussian();
+		Double x = samplesRandGenerator.getNextScaledGaussian();
 		// insure that there is at least one
 		if (x < 1)
 			return 1L;
@@ -510,7 +510,7 @@ public class GenerateCSVFiles {
 		if (meanPhotoCopies == 0)
 			return 0;
 
-		Double x = photosRandGenerator.getNextGaussian();
+		Double x = photosRandGenerator.getNextScaledGaussian();
 		// insure that there is at least one
 		if (x < 1)
 			return 1L;
