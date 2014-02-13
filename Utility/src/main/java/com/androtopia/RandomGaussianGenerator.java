@@ -13,7 +13,7 @@ import static java.lang.System.out;
 public final class RandomGaussianGenerator {
 
 	private Double mean = null;
-	private Double variance = null;
+	private Double stdDev = null;
 	private Random generator = null;
 
 	public RandomGaussianGenerator() {
@@ -25,12 +25,12 @@ public final class RandomGaussianGenerator {
 	 * 
 	 * @param mean
 	 *            the "base" average value.
-	 * @param variance
+	 * @param stdDev
 	 *            the amount to vary the mean value (+/-)
 	 */
-	public RandomGaussianGenerator(double mean, double variance) {
+	public RandomGaussianGenerator(double mean, double stdDev) {
 		this.mean = mean;
-		this.variance = variance;
+		this.stdDev = stdDev;
 		generator = new Random();
 	}
 
@@ -55,7 +55,7 @@ public final class RandomGaussianGenerator {
 		}
 		// generate values
 		for (int idx = 1; idx <= resultCount; ++idx) {
-			out.println(self.getNextGaussian());
+			out.println(self.getNextScaledGaussian());
 		}
 	}
 
@@ -66,12 +66,12 @@ public final class RandomGaussianGenerator {
 	 * @return a pseudo-random floating point value using the mean and variance
 	 *         passed in the constructor.
 	 */
-	public double getNextGaussian() {
-		if (mean == null || variance == null) {
+	public double getNextScaledGaussian() {
+		if (mean == null || stdDev == null) {
 			throw new IllegalStateException(
-					"Mean and/or variance not initialized;\nuse RandomGaussianGenerator(double mean, double variance) constructor.");
+					"Mean and/or variance not initialized;\nuse RandomGaussianGenerator(double mean, double stdDev) constructor.");
 		}
-		return mean + generator.nextGaussian() * variance;
+		return mean + generator.nextGaussian() * stdDev;
 	}
 
 	/**
@@ -81,7 +81,7 @@ public final class RandomGaussianGenerator {
 	 * @return a pseudo-random floating point value using the passed mean and
 	 *         variance.
 	 */
-	public double getNextGaussian(double mean, double variance) {
-		return mean + generator.nextGaussian() * variance;
+	public double getNextScaledGaussian(double mean, double stdDev) {
+		return mean + generator.nextGaussian() * stdDev;
 	}
 }
