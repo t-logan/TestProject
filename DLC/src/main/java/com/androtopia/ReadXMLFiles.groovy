@@ -29,6 +29,7 @@ public class ReadXMLFiles extends DirectoryWalker {
 
 	private String user
 	private String password
+	private String targetDir
 
 	private String encodedConverterPic
 	private Zipper zipper = new Zipper()
@@ -62,7 +63,8 @@ public class ReadXMLFiles extends DirectoryWalker {
 				self.password);
 
 		List results = new ArrayList();
-		File startDirectory = new File(props.getProperty("target.dir"));
+		self.targetDir = props.getProperty("target.dir")
+		File startDirectory = new File(self.targetDir);
 		println "Running ..."
 		self.walk(startDirectory, results);
 
@@ -107,7 +109,7 @@ public class ReadXMLFiles extends DirectoryWalker {
 		zipper.unzip(inputFile + "c");
 		cxmlReadTime = (System.currentTimeMillis() - cxmlReadStartTime) + xmlReadTime;
 
-		xmlFileName = inputFile.substring(inputFile.lastIndexOf('/') + 1)
+		xmlFileName = inputFile.substring(targetDir.length())
 		cxmlFileName = xmlFileName + "c"
 		updateDatabase(xmlFileName, cxmlFileName);
 	}
@@ -117,6 +119,7 @@ public class ReadXMLFiles extends DirectoryWalker {
 		ResultSet rs = null;
 		
 		String xmlSql = "update Stats set timeToReadInMilliseconds = " + xmlReadTime + " where fileName = \"" + xmlFileName + "\""
+		println xmlSql
 		String cxmlSql = "update Stats set timeToReadInMilliseconds = " + cxmlReadTime + " where fileName = \"" + cxmlFileName + "\""
 		try {
 			st = con.createStatement();
