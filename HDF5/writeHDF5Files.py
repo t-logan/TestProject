@@ -73,7 +73,7 @@ def processFile(file):
             for i in range(photoCopies):
                 with open(imageFile, "rb") as f2:
                     imageBytes = f2.read(BINARY_IMAGE_SIZE)
-                    opd = f.create_dataset(('photo' + str(i)), (BINARY_IMAGE_SIZE,), dtype=dtOpaque)
+                    opd = f.create_dataset((fields[0] + '/photo' + str(i)), (BINARY_IMAGE_SIZE,), dtype=dtOpaque)
                     opd = imageBytes
 
         vin = fields[0]                                     # preallocate compound array
