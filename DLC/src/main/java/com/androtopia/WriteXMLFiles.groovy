@@ -28,6 +28,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	private int fileCount = 0;
 
 	private Vehicle vehicle
+	private groovy.xml.StreamingMarkupBuilder builder
 	private Emissions emissions
 	private String user;
 	private String password;
@@ -45,6 +46,8 @@ public class WriteXMLFiles extends DirectoryWalker {
 
 	public WriteXMLFiles() {
 		super();
+		builder = new groovy.xml.StreamingMarkupBuilder()
+		builder.encoding = "UTF-8"
 	}
 
 	/**
@@ -60,20 +63,23 @@ public class WriteXMLFiles extends DirectoryWalker {
 		InputStream is = cl.getResourceAsStream("dlc.properties");
 		props.load(is);
 		is.close();
-		
+
 		self.outputDataPath = props.getProperty("target.dir");
-		
+
 		self.url = props.getProperty("db.url");
 		self.user = props.getProperty("db.user");
 		self.password = props.getProperty("db.pw");
 		self.con = DriverManager.getConnection(self.url, self.user,
 				self.password);
-		
+
 		List results = new ArrayList();
 		File startDirectory = new File(props.getProperty("target.dir"));
 		println "Running ..."
 		self.walk(startDirectory, results);
 		
+		// pick up the last one
+		self.emitXml(self.vehicle, self.builder)
+
 		if (self.con != null) {
 			self.con.close();
 		}
@@ -81,10 +87,12 @@ public class WriteXMLFiles extends DirectoryWalker {
 		println "Done!"
 	}
 
+	// callback routine
 	protected boolean handleDirectory(File directory, int depth, Collection results) {
 		return true;
 	}
 
+	// callback routine
 	protected void handleFile(File file, int depth, Collection results) {
 		if(file.getName().endsWith(".csv")) {
 			generateFiles(file.getAbsolutePath());
@@ -100,7 +108,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 		String xmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
 				vehicle.vin + ".xml\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
 				xmlWriteTime + ")"
-				
+
 		String cxmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
 				vehicle.vin + ".xmlc\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
 				cxmlWriteTime + ")"
@@ -132,9 +140,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 	 */
 	private void generateFiles(String inputFile) {
 
-		groovy.xml.StreamingMarkupBuilder builder = new groovy.xml.StreamingMarkupBuilder()
-		builder.encoding = "UTF-8"
-
 		boolean isVehicleRec
 		String line
 		int lineCount = 0
@@ -156,7 +161,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 			// skip header record
 			if(lineCount == 1)
 				continue
-			//println line
 			tokenCount = 0
 			emissions = new Emissions()
 			while (st.hasMoreTokens()) {
@@ -218,16 +222,16 @@ public class WriteXMLFiles extends DirectoryWalker {
 					case 13:
 						emissionsSamples = Integer.parseInt(tok)
 						break
-					case 14: 
+					case 14:
 						photoCopies = Integer.parseInt(tok)
 				}
 				// inject the emissions data into the vehicle information
-				
+
 			}
 			vehicle.emissions.add(emissions)
 		}
-		// pick up the last vehicle
-		emitXml(vehicle, builder)
+		//		if(line == null)
+		//			emitXml(vehicle, builder)
 		br.close();
 	}
 
@@ -242,10 +246,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 		// output XML file
 		FileWriter xmlFile = new FileWriter(new File(outputDataPath + v.vin + ".xml"))
 
-		// encode the catalytic converter picture included in every vehicle entity
-		// ENCODE EVERY TIME
-//		encodedConverterPic = WriteXMLFiles.encodeImage("catalytic-converter-6.jpg")
-
 		// add reference to the schema
 		genXmlHeader(xmlFile, builder);
 
@@ -253,14 +253,17 @@ public class WriteXMLFiles extends DirectoryWalker {
 		def vehicleXml = {
 			vehicle() {
 				vin(v.vin )
+				println v.vin
 				manufacturer(v.manufacturer )
 				modelYear(v.modelYear )
 				vehicleType(v.vehicleType)
 				oilChangeDistance(v.oilChangeDistance)
 				odometer(v.odometer)
 				comments(v.comments)
-				for(int i =0; i < photoCopies; i++)
-					unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("catalytic-converter-6.jpg") + "]]></photo>"
+				for(int i =0; i < photoCopies; i++) {
+					//unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("catalytic-converter-6.jpg") + "]]></photo>"
+					unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("photo" + i + ".jpg") + "]]></photo>"
+				}
 				v.emissions.each{ e->
 					emission() {
 						dateTested(e.dateTested)
@@ -313,9 +316,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 		// filler bytes will be inserted into the middle of the file, as three
 		// octets map to four characters. This is the reason that the encoded data
 		// is about 1/3 bigger than the binary image data.
-		int chunkSize = 72
-		int bufferSize = 144
+		int chunkSize = 720000
+		int bufferSize = 1440000
 		int read = 0
+		int sizeInBytes = 0
 		byte[] imageChunk = new byte[chunkSize]
 		byte[] encoded = new byte[bufferSize]
 		String encodedString = ""
@@ -332,8 +336,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 		while ((read = imageFile.read(imageChunk)) != -1) {
 			encoded = Base64.encodeBase64(imageChunk)
 			encodedString += (new String(encoded) + "\n")
+			sizeInBytes += read
 		}
 		imageFile.close()
+		println inputFile + ": " + sizeInBytes
 		return encodedString
 	}
 
