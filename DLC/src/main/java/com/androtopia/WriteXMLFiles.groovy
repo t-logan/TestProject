@@ -337,7 +337,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 
 		// build up encoded string
 		while ((read = imageFile.read(imageChunk)) != -1) {
-			encoded = Base64.encodeBase64(imageChunk)
+			byte[] buf = new byte[read]
+			for(int i=0; i < read; i++)
+				buf[i] = imageChunk[i]
+			encoded = Base64.encodeBase64(buf)
 			encodedString += (new String(encoded) + "\n")
 			sizeInBytes += read
 		}
