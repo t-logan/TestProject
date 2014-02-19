@@ -119,7 +119,6 @@ public class ReadXMLFiles extends DirectoryWalker {
 		ResultSet rs = null;
 		
 		String xmlSql = "update Stats set timeToReadInMilliseconds = " + xmlReadTime + " where fileName = \"" + xmlFileName + "\""
-		println xmlSql
 		String cxmlSql = "update Stats set timeToReadInMilliseconds = " + cxmlReadTime + " where fileName = \"" + cxmlFileName + "\""
 		try {
 			st = con.createStatement();
