@@ -22,10 +22,9 @@ import org.apache.commons.io.DirectoryWalker
  */
 public class WriteXMLFiles extends DirectoryWalker {
 
-	private int BINARY_IMAGE_SIZE = 114173;
 	private String url = null
 	private Connection con = null
-	private int fileCount = 0;
+	private int fileCount = 0
 
 	private Vehicle vehicle
 	private groovy.xml.StreamingMarkupBuilder builder
@@ -40,9 +39,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 	private long cxmlWriteStartTime = 0;
 	private long cxmlWriteTime = 0;
 
-	private String outputDataPath = "";
-	private int emissionsSamples = 0;
-	private int photoCopies = 0;
+	private String outputDataPath = ""
+	private int emissionsSamples = 0
+	private int photoCopies = 0
+	private int totalImageBytes = 0
 
 	public WriteXMLFiles() {
 		super();
@@ -76,9 +76,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 		File startDirectory = new File(props.getProperty("target.dir"));
 		println "Running ..."
 		self.walk(startDirectory, results);
-		
+
 		// pick up the last one
 		self.emitXml(self.vehicle, self.builder)
+		self.updateDatabase();
 
 		if (self.con != null) {
 			self.con.close();
@@ -96,7 +97,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	protected void handleFile(File file, int depth, Collection results) {
 		if(file.getName().endsWith(".csv")) {
 			generateFiles(file.getAbsolutePath());
-			updateDatabase();
+			//updateDatabase();
 			results.add(file);
 		}
 	}
@@ -106,11 +107,11 @@ public class WriteXMLFiles extends DirectoryWalker {
 		ResultSet rs = null;
 
 		String xmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
-				vehicle.vin + ".xml\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
+				vehicle.vin + ".xml\"," + photoCopies + "," + emissionsSamples + "," + totalImageBytes + "," +
 				xmlWriteTime + ")"
 
 		String cxmlSql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" +
-				vehicle.vin + ".xmlc\"," + photoCopies + "," + emissionsSamples + "," + (BINARY_IMAGE_SIZE * photoCopies) + "," +
+				vehicle.vin + ".xmlc\"," + photoCopies + "," + emissionsSamples + "," + totalImageBytes + "," +
 				cxmlWriteTime + ")"
 		try {
 			st = con.createStatement();
@@ -118,6 +119,10 @@ public class WriteXMLFiles extends DirectoryWalker {
 			st.execute(xmlSql);
 			// record CXML stats
 			st.execute(cxmlSql);
+			
+			totalImageBytes = 0
+			
+			//totalImageBytes = 0
 		} catch (SQLException ex) {
 			println ex.getMessage()
 		} finally {
@@ -144,7 +149,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 		String line
 		int lineCount = 0
 		int tokenCount = 0
-		
+
 		println inputFile + ": " + ++fileCount
 
 		// about to start reading the CSV file
@@ -174,6 +179,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 						else {
 							if(vehicle != null) {
 								emitXml(vehicle, builder)
+								updateDatabase()
 							}
 							vehicle = new Vehicle()
 							vehicle.vin = tok
@@ -230,8 +236,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 			}
 			vehicle.emissions.add(emissions)
 		}
-		//		if(line == null)
-		//			emitXml(vehicle, builder)
 		br.close();
 	}
 
@@ -253,7 +257,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 		def vehicleXml = {
 			vehicle() {
 				vin(v.vin )
-				println v.vin
 				manufacturer(v.manufacturer )
 				modelYear(v.modelYear )
 				vehicleType(v.vehicleType)
@@ -262,7 +265,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 				comments(v.comments)
 				for(int i =0; i < photoCopies; i++) {
 					//unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("catalytic-converter-6.jpg") + "]]></photo>"
-					unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("photo" + i + ".jpg") + "]]></photo>"
+					unescaped << "<photo><![CDATA[" + encodeImage("photo" + i + ".jpg") + "]]></photo>"
 				}
 				v.emissions.each{ e->
 					emission() {
@@ -310,7 +313,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	 * @return the encoded String
 	 * @throws IOException when file errors occur
 	 */
-	static String encodeImage(String inputFile) throws IOException {
+	String encodeImage(String inputFile) throws IOException {
 
 		// chunksize must be divisible by 3, or the image gets corrupted because
 		// filler bytes will be inserted into the middle of the file, as three
@@ -339,7 +342,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 			sizeInBytes += read
 		}
 		imageFile.close()
-		println inputFile + ": " + sizeInBytes
+		totalImageBytes += sizeInBytes
 		return encodedString
 	}
 
