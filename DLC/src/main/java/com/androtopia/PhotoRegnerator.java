@@ -16,7 +16,7 @@ import org.apache.commons.io.FileUtils;
 public class PhotoRegnerator extends DirectoryWalker {
 
 	private String outputDataPath = "";
-	private File startDirectory;
+	private File imageDir;
 	private Properties props;
 
 	public PhotoRegnerator() {
@@ -33,11 +33,9 @@ public class PhotoRegnerator extends DirectoryWalker {
 		is.close();
 
 		List results = new ArrayList();
-		startDirectory = new File(props.getProperty("image.dir"));
-		out.println("Running ...");
-		walk(startDirectory, results);
+		imageDir = new File(props.getProperty("image.dir"));
+		walk(imageDir, results);
 		regen();
-		out.println("Done!");
 	}
 
 	// callback routine
@@ -50,7 +48,6 @@ public class PhotoRegnerator extends DirectoryWalker {
 	protected void handleFile(File file, int depth, Collection results)
 			throws IOException {
 		if (file.getName().startsWith("photo")) {
-			out.println(file.getName());
 			file.delete();
 			results.add(file);
 		}
@@ -59,12 +56,8 @@ public class PhotoRegnerator extends DirectoryWalker {
 	private void regen() throws IOException {
 
 		for (int i = 0; i < 11; i++) {
-			FileUtils
-					.copyFile(
-							new File(startDirectory + "\\"
-									+ props.getProperty("image")), new File(
-									startDirectory + "\\" + "photo" + i
-											+ ".jpg"));
+			File resDir = new File(props.getProperty("resource.dir"));
+			FileUtils.copyDirectory(resDir, imageDir);
 		}
 
 	}
