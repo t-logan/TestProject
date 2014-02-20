@@ -43,6 +43,9 @@ public class WriteXMLFiles extends DirectoryWalker {
 	private int emissionsSamples = 0
 	private int photoCopies = 0
 	private int totalImageBytes = 0
+	
+	private Properties props
+	private PhotoRegnerator photoRegnerator;
 
 	public WriteXMLFiles() {
 		super();
@@ -58,22 +61,24 @@ public class WriteXMLFiles extends DirectoryWalker {
 		WriteXMLFiles self = new WriteXMLFiles();
 
 		// load properties
-		Properties props = new Properties();
+		self.props = new Properties();
 		ClassLoader cl = GenerateCSVFiles.class.getClassLoader();
 		InputStream is = cl.getResourceAsStream("dlc.properties");
-		props.load(is);
+		self.props.load(is);
 		is.close();
 
-		self.outputDataPath = props.getProperty("target.dir");
+		self.outputDataPath = self.props.getProperty("target.dir");
 
-		self.url = props.getProperty("db.url");
-		self.user = props.getProperty("db.user");
-		self.password = props.getProperty("db.pw");
+		self.url = self.props.getProperty("db.url");
+		self.user = self.props.getProperty("db.user");
+		self.password = self.props.getProperty("db.pw");
 		self.con = DriverManager.getConnection(self.url, self.user,
 				self.password);
 
+		self.photoRegnerator = new PhotoRegnerator();
+			
 		List results = new ArrayList();
-		File startDirectory = new File(props.getProperty("target.dir"));
+		File startDirectory = new File(self.props.getProperty("target.dir"));
 		println "Running ..."
 		self.walk(startDirectory, results);
 
@@ -96,6 +101,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	// callback routine
 	protected void handleFile(File file, int depth, Collection results) {
 		if(file.getName().endsWith(".csv")) {
+			photoRegnerator.regenPhotos();
 			generateFiles(file.getAbsolutePath());
 			//updateDatabase();
 			results.add(file);
@@ -265,7 +271,8 @@ public class WriteXMLFiles extends DirectoryWalker {
 				comments(v.comments)
 				for(int i =0; i < photoCopies; i++) {
 					//unescaped << "<photo><![CDATA[" + WriteXMLFiles.encodeImage("catalytic-converter-6.jpg") + "]]></photo>"
-					unescaped << "<photo><![CDATA[" + encodeImage("photo" + i + ".jpg") + "]]></photo>"
+					unescaped << "<photo><![CDATA[" + encodeImage(
+						new FileInputStream(props.getProperty("image.dir") + "photo" + i + ".jpg")) + "]]></photo>"
 				}
 				v.emissions.each{ e->
 					emission() {
@@ -313,7 +320,7 @@ public class WriteXMLFiles extends DirectoryWalker {
 	 * @return the encoded String
 	 * @throws IOException when file errors occur
 	 */
-	String encodeImage(String inputFile) throws IOException {
+	String encodeImage(FileInputStream imageFile) throws IOException {
 
 		// chunksize must be divisible by 3, or the image gets corrupted because
 		// filler bytes will be inserted into the middle of the file, as three
@@ -326,14 +333,6 @@ public class WriteXMLFiles extends DirectoryWalker {
 		byte[] imageChunk = new byte[chunkSize]
 		byte[] encoded = new byte[bufferSize]
 		String encodedString = ""
-
-		InputStream imageFile = WriteXMLFiles.class.getClassLoader()
-				.getResourceAsStream(inputFile);
-
-		if (imageFile == null) {
-			throw new IOException("Input file '" + inputFile
-			+ "' not found on class path.");
-		}
 
 		// build up encoded string
 		while ((read = imageFile.read(imageChunk)) != -1) {
