@@ -1,7 +1,5 @@
 package com.androtopia;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 public class TimingTest {
@@ -10,7 +8,7 @@ public class TimingTest {
 	public void test() {
 
 		long startTime;
-		long endTime = 0;
+		long runTime = 0;
 
 		synchronized (this) {
 			for (int i = 1; i <= 500; i++) {
@@ -18,8 +16,8 @@ public class TimingTest {
 				for (int j = 1; j <= i * 10000; j++) {
 					quadraticEquationRootMax(5.5, 6.0, 3.5);
 				}
-				endTime = System.currentTimeMillis() - startTime;
-				System.out.println(i + "," + endTime);
+				runTime = System.currentTimeMillis() - startTime;
+				System.out.println(i + "," + runTime);
 			}
 		}
 	}
