@@ -46,7 +46,10 @@ def processFile(file):
     linesIn += 1
     fields = line.split(",")                                # tokenize the input
     if(fields[0] != '""' and linesIn != 1):
-        f = h5py.File(targetDir + fields[0] + ".hdf5", "w")   # open the output HDF5 File
+        if(opaqueImage == "0"):
+            f = h5py.File(targetDir + fields[0] + ".hdf5a", "w")   # open the output HDF5 File
+        else:
+            f = h5py.File(targetDir + fields[0] + ".hdf5b", "w")   # open the output HDF5 File
         
         grp = f.create_group(fields[0])                     # create vehicle group (VIN id)
         grp['manufacturer'] = str.strip(fields[1], '"')     # populate the vehicle group ...
@@ -106,9 +109,13 @@ if __name__ == '__main__':
             print file
             startTime = int(round(time.time() * 1000))
             processFile(file)
+            if(opaqueImage == "0"):
+                fileExt = ".hdf5a"
+            else:
+                fileExt = ".hdf5b"
             writeTime = int(round(time.time() * 1000)) - startTime
             sql = "insert into Stats (fileName, numberOfPhotos, emissionsSamples, binaryBytes, timeToCreateInMilliseconds) values (\"" + \
-                vin + ".hdf5\"," + str(photoCopies) + "," + emissionsSamples + "," + str((BINARY_IMAGE_SIZE * photoCopies)) + "," + \
+                vin + fileExt +"\"," + str(photoCopies) + "," + emissionsSamples + "," + str((BINARY_IMAGE_SIZE * photoCopies)) + "," + \
                 str(writeTime) + ")"
             cur = db.cursor()                                   # record statistics
             cur.execute(sql)
