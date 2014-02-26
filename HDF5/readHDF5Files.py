@@ -40,7 +40,7 @@ def processFile(file):
     
     # OPEN DATASETS ...
     grpName = file.lstrip(targetDir)
-    grpName = grpName.rstrip('.hdf5')
+    grpName = grpName.rstrip('.hdf5ab')
     if(len(grpName) == 16):                                 # see if a trailing 5 was stripped from the VIN number (corner case) ...
         grpName = grpName + "5"
     if(len(grpName) == 15):                                
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     print "Running ..."
                       
     for file in DirectoryWalker(os.path.abspath(targetDir)):     # read all the HDF5 files
-        if(str.find(file, ".hdf5") != -1):
+        if(str.find(file, ".hdf5a") != -1 or str.find(file, ".hdf5b") != -1):
             startTime = int(round(time.time() * 1000))
             processFile(file)
             readTime = int(round(time.time() * 1000)) - startTime
