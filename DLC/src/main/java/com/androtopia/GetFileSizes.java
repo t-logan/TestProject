@@ -59,7 +59,8 @@ public class GetFileSizes extends DirectoryWalker {
 		ResultSet rs = null;
 
 		if (file.getName().endsWith(".xml") || file.getName().endsWith(".xmlc")
-				|| file.getName().endsWith(".hdf5")) {
+				|| file.getName().endsWith(".hdf5a")
+				|| file.getName().endsWith(".hdf5b")) {
 
 			String sql = "update Stats set sizeOnDiskInBytes = "
 					+ file.length() + " where fileName = \"" + file.getName()
