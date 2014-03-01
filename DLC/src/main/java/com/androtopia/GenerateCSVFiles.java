@@ -24,7 +24,7 @@ public class GenerateCSVFiles {
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"
 			+ "ODOMETER,COMMENTS,DATE_TESTED,EXHAUST_HC,NON_EXHAUST_HC,EXHAUST_CO,EXHAUST_NO2,SAMPLE_COUNT,PHOTO_COPIES\n";
 
-	// default variables that control the volume of output
+	// default variables that control the volume of output.
 	private int numberOfVehicles = 100;
 	private int meanSamples = 0;
 	private float sdSamples = 0;
