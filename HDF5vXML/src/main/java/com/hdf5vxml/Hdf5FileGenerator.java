@@ -26,7 +26,7 @@ public class Hdf5FileGenerator implements IFileWriter {
 
 		String arrayExt = ".hdf5a";
 		String binExt = ".hdf5b";
-		
+
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + arrayExt;
 
@@ -57,6 +57,8 @@ public class Hdf5FileGenerator implements IFileWriter {
 		importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		importImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 
+		importOpaqueImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+
 		ff.close();
 	}
 
@@ -78,8 +80,7 @@ public class Hdf5FileGenerator implements IFileWriter {
 		int fid = -1, sid = -1, did = -1, wid = -1;
 		int rank = 2;
 		long[] dimensions = { rows, cols };
-		double[][] values = new double[rows][cols]; // { { 1.123456789, 2.2 }, {
-													// 3.3, 4.4 } };
+		double[][] values = new double[rows][cols];
 
 		// populate the array
 		double value = 1.0;
@@ -92,7 +93,7 @@ public class Hdf5FileGenerator implements IFileWriter {
 		try {
 			fid = hdfFile.getFID();
 
-			// Create the data space for the int dataset.
+			// Create the data space for the dataset.
 			sid = H5.H5Screate_simple(rank, dimensions, null);
 
 			// Create the int array dataset.
@@ -101,7 +102,7 @@ public class Hdf5FileGenerator implements IFileWriter {
 						HDF5Constants.H5T_IEEE_F64BE, sid,
 						HDF5Constants.H5P_DEFAULT);
 			else
-				out.println("> writeIntArrayToDataset FAILED while creating the int array dataset. fid="
+				out.println("FAILED while creating the array dataset. fid="
 						+ fid + ", sid=" + sid);
 
 			// Write array to the dataset using default transfer properties.
@@ -109,8 +110,7 @@ public class Hdf5FileGenerator implements IFileWriter {
 					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
 					HDF5Constants.H5P_DEFAULT, values);
 			if (wid < 0)
-				out.println("> writeIntArrayToDataset write FAILED to 3x3 int array, wid="
-						+ wid);
+				out.println("write FAILED to 2x2 array, wid=" + wid);
 
 			// End access to the data set and release resources used by it.
 			if (did >= 0)
@@ -222,5 +222,52 @@ public class Hdf5FileGenerator implements IFileWriter {
 		data = null;
 		image = null;
 		Runtime.getRuntime().gc();
+	}
+
+	/**
+	 * Imports an image file into a HDF4/5 file in the specified parent group.
+	 * 
+	 * JPEG, TIFF, PNG, GIF, and BMP are supported.
+	 * 
+	 * @param imgFileName
+	 *            the input image file.
+	 * @param hdfFile
+	 *            the name of the HDF4/5 file being imported to.
+	 * @param pGroup
+	 *            the parent Group of the imported image.
+	 * @param hdfFileType
+	 *            the type of file converted to.
+	 */
+	private void importOpaqueImageFile(String imgFileName, FileFormat hdfFile,
+			Group pGroup, String hdfFileType) throws Exception {
+		
+		String FILE = "opaque.h5";
+		String DATASET = "DS1";
+		int DIM0 = 4;
+		int LEN = 7;
+		
+		int file, space, dtype, dset;
+		int status;
+		long[] dims = {DIM0};
+		int len;
+		byte[] wdata = new byte[DIM0 * LEN];
+		String value = "OPAQUE";
+		int ndims, i, j;
+		
+		wdata[0] = 'A';
+		
+		file = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+		
+		dtype = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, LEN);
+		status = H5.H5Tset_tag(dtype, "Tag");
+		
+		space = H5.H5Screate_simple(1, dims, null);
+		dset = H5.H5Dcreate(file, DATASET, dtype, space, HDF5Constants.H5P_DEFAULT);
+		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, wdata);
+		
+		status = H5.H5Dclose(dset);
+		status = H5.H5Sclose(space);
+		status = H5.H5Tclose(dtype);
+		status = H5.H5Fclose(file);
 	}
 }
