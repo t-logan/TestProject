@@ -1,5 +1,7 @@
 package com.hdf5;
 
+import static java.lang.System.out;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -7,6 +9,8 @@ import java.io.FileInputStream;
 
 import javax.imageio.ImageIO;
 
+import ncsa.hdf.hdf5lib.H5;
+import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
@@ -15,23 +19,72 @@ import ncsa.hdf.object.ScalarDS;
 public class ImageProcessing {
 
 	public static void main(String[] args) throws Exception {
-		importImages();
+		populate();
 	}
 
-	private static void importImages() throws Exception {
+	private static void populate() throws Exception {
 
 		// create an HDF5 dataset
 		FileFormat ff = FileFormat.getInstance("dset.h5");
 		ff.create("dset.h5");
+		
+		ff.createGroup("ArrayGroup", null);
+		Group aGroup = (Group) ff.get("ArrayGroup");
 		ff.createGroup("ImageGroup", null);
-		Group pgroup = (Group) ff.get("ImageGroup");
+		Group pGroup = (Group) ff.get("ImageGroup");
+		
+		// array
+		write2DArray(2, 2, "twoXtwo_1", ff,  aGroup);
+		write2DArray(2, 2, "twoXtwo_2", ff,  aGroup);
 
 		// import three images
-		importImageFile("photo0.jpg", ff, pgroup, FileFormat.FILE_TYPE_HDF5);
-		importImageFile("photo1.jpg", ff, pgroup, FileFormat.FILE_TYPE_HDF5);
-		importImageFile("photo116.jpg", ff, pgroup, FileFormat.FILE_TYPE_HDF5);
+		importImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		importImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 
 		ff.close();
+	}
+
+	private static void write2DArray(int rows, int cols, String dsName,
+			FileFormat hdfFile, Group pGroup) throws Exception {
+
+		int fid = -1, sid = -1, did = -1, wid = -1;
+		int RANK = 2;
+		long[] DIMENSIONS = { rows, cols };
+		double[][] VALUES = { { 1.1, 2.2 }, { 3.3, 4.4 } };
+
+		try {
+			fid = hdfFile.getFID();
+
+			// Create the data space for the int dataset.
+			sid = H5.H5Screate_simple(RANK, DIMENSIONS, null);
+
+			// Create the int array dataset.
+			if ((fid >= 0) && (sid >= 0))
+				did = H5.H5Dcreate(fid, pGroup + "/" + dsName, HDF5Constants.H5T_STD_I32BE,
+						sid, HDF5Constants.H5P_DEFAULT);
+			else
+				out.println("> writeIntArrayToDataset FAILED while creating the int array dataset. fid="
+						+ fid + ", sid=" + sid);
+
+			// Write array to the dataset using default transfer properties.
+			wid = H5.H5Dwrite(did, HDF5Constants.H5T_NATIVE_INT,
+					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+					HDF5Constants.H5P_DEFAULT, VALUES);
+			if (wid < 0)
+				out.println("> writeIntArrayToDataset write FAILED to 3x3 int array, wid="
+						+ wid);
+
+			// End access to the dataset and release resources used by it.
+			if (did >= 0)
+				H5.H5Dclose(did);
+			// Terminate access to the data space.
+			if (sid >= 0)
+				H5.H5Sclose(sid);
+		} catch (Throwable t) {
+			out.println("> Error writing array: " + t.getMessage());
+			return;
+		}
 	}
 
 	/**
@@ -59,7 +112,7 @@ public class ImageProcessing {
 		} else if (hdfFile == null) {
 			throw new NullPointerException("Target HDF file is null.");
 		}
-		
+
 		if (!(hdfFileType.equals(FileFormat.FILE_TYPE_HDF4) || hdfFileType
 				.equals(FileFormat.FILE_TYPE_HDF5))) {
 			throw new UnsupportedOperationException(
