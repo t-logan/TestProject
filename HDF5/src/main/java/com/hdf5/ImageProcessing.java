@@ -61,14 +61,14 @@ public class ImageProcessing {
 
 			// Create the int array dataset.
 			if ((fid >= 0) && (sid >= 0))
-				did = H5.H5Dcreate(fid, pGroup + "/" + dsName, HDF5Constants.H5T_STD_I32BE,
+				did = H5.H5Dcreate(fid, pGroup + "/" + dsName, HDF5Constants.H5T_IEEE_F64BE,
 						sid, HDF5Constants.H5P_DEFAULT);
 			else
 				out.println("> writeIntArrayToDataset FAILED while creating the int array dataset. fid="
 						+ fid + ", sid=" + sid);
 
 			// Write array to the dataset using default transfer properties.
-			wid = H5.H5Dwrite(did, HDF5Constants.H5T_NATIVE_INT,
+			wid = H5.H5Dwrite(did, HDF5Constants.H5T_NATIVE_DOUBLE,
 					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
 					HDF5Constants.H5P_DEFAULT, VALUES);
 			if (wid < 0)
