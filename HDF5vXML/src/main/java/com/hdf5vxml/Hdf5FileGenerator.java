@@ -242,32 +242,30 @@ public class Hdf5FileGenerator implements IFileWriter {
 			Group pGroup, String hdfFileType) throws Exception {
 		
 		String FILE = "opaque.h5";
-		String DATASET = "DS1";
+		String DATASET = imgFileName;
 		int DIM0 = 4;
 		int LEN = 7;
 		
-		int file, space, dtype, dset;
+		int space, dtype, dset;
 		int status;
 		long[] dims = {DIM0};
 		int len;
-		byte[] wdata = new byte[DIM0 * LEN];
+		int[] data = new int[DIM0 * LEN];
 		String value = "OPAQUE";
 		int ndims, i, j;
-		
-		wdata[0] = 'A';
-		
-		file = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+				
+		// int file = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 		
 		dtype = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, LEN);
 		status = H5.H5Tset_tag(dtype, "Tag");
 		
 		space = H5.H5Screate_simple(1, dims, null);
-		dset = H5.H5Dcreate(file, DATASET, dtype, space, HDF5Constants.H5P_DEFAULT);
-		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, wdata);
+		dset = H5.H5Dcreate(hdfFile.getFID(), DATASET, dtype, space, HDF5Constants.H5P_DEFAULT);
+		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
 		
 		status = H5.H5Dclose(dset);
 		status = H5.H5Sclose(space);
 		status = H5.H5Tclose(dtype);
-		status = H5.H5Fclose(file);
+		//status = H5.H5Fclose(file);
 	}
 }
