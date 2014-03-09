@@ -27,17 +27,17 @@ public class ImageProcessing {
 		// create an HDF5 dataset
 		FileFormat ff = FileFormat.getInstance("dset.h5");
 		ff.create("dset.h5");
-		
+
+		// array
 		ff.createGroup("ArrayGroup", null);
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		ff.createGroup("ImageGroup", null);
-		Group pGroup = (Group) ff.get("ImageGroup");
-		
-		// array
-		write2DArray(2, 2, "twoXtwo_1", ff,  aGroup);
-		write2DArray(2, 2, "twoXtwo_2", ff,  aGroup);
+		write2DArray(2, 2, "2x2", ff, aGroup);
+		write2DArray(3, 3, "3x3", ff, aGroup);
+		write2DArray(10, 7, "10x7", ff, aGroup);
 
 		// import three images
+		ff.createGroup("ImageGroup", null);
+		Group pGroup = (Group) ff.get("ImageGroup");
 		importImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		importImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
@@ -45,24 +45,46 @@ public class ImageProcessing {
 		ff.close();
 	}
 
+	/**
+	 * @param rows
+	 *            the number of rows in the output array.
+	 * @param cols
+	 *            the number of columns in the output array.
+	 * @param dsName
+	 *            the array dataset name.
+	 * @param hdfFile
+	 *            the HDF FileFormat descriptor.
+	 * @param pGroup
+	 *            the parent group name.
+	 */
 	private static void write2DArray(int rows, int cols, String dsName,
 			FileFormat hdfFile, Group pGroup) throws Exception {
 
 		int fid = -1, sid = -1, did = -1, wid = -1;
-		int RANK = 2;
-		long[] DIMENSIONS = { rows, cols };
-		double[][] VALUES = { { 1.1, 2.2 }, { 3.3, 4.4 } };
+		int rank = 2;
+		long[] dimensions = { rows, cols };
+		double[][] values = new double[rows][cols]; // { { 1.123456789, 2.2 }, {
+													// 3.3, 4.4 } };
+
+		// populate the array
+		double value = 1.0;
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < cols; col++) {
+				values[row][col] = value++;
+			}
+		}
 
 		try {
 			fid = hdfFile.getFID();
 
 			// Create the data space for the int dataset.
-			sid = H5.H5Screate_simple(RANK, DIMENSIONS, null);
+			sid = H5.H5Screate_simple(rank, dimensions, null);
 
 			// Create the int array dataset.
 			if ((fid >= 0) && (sid >= 0))
-				did = H5.H5Dcreate(fid, pGroup + "/" + dsName, HDF5Constants.H5T_IEEE_F64BE,
-						sid, HDF5Constants.H5P_DEFAULT);
+				did = H5.H5Dcreate(fid, pGroup + "/" + dsName,
+						HDF5Constants.H5T_IEEE_F64BE, sid,
+						HDF5Constants.H5P_DEFAULT);
 			else
 				out.println("> writeIntArrayToDataset FAILED while creating the int array dataset. fid="
 						+ fid + ", sid=" + sid);
@@ -70,12 +92,12 @@ public class ImageProcessing {
 			// Write array to the dataset using default transfer properties.
 			wid = H5.H5Dwrite(did, HDF5Constants.H5T_NATIVE_DOUBLE,
 					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-					HDF5Constants.H5P_DEFAULT, VALUES);
+					HDF5Constants.H5P_DEFAULT, values);
 			if (wid < 0)
 				out.println("> writeIntArrayToDataset write FAILED to 3x3 int array, wid="
 						+ wid);
 
-			// End access to the dataset and release resources used by it.
+			// End access to the data set and release resources used by it.
 			if (did >= 0)
 				H5.H5Dclose(did);
 			// Terminate access to the data space.
@@ -88,9 +110,9 @@ public class ImageProcessing {
 	}
 
 	/**
-	 * JPEG, TIFF, PNG, GIF, and BMP are supported.
+	 * Imports an image file into a HDF4/5 file in the specified parent group.
 	 * 
-	 * Converts an image file into HDF4/5 file.
+	 * JPEG, TIFF, PNG, GIF, and BMP are supported.
 	 * 
 	 * @param imgFileName
 	 *            the input image file.
