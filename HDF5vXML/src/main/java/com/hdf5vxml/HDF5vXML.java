@@ -7,8 +7,9 @@ import java.text.NumberFormat;
 
 public class HDF5vXML {
 
-	private final XmlFileGenerator xmlFileGenerator;
-	private final Hdf5FileGenerator hdf5FileGenerator;
+	private final IFileGenerator xmlFileGenerator;
+	private final IFileGenerator hdf5FileGenerator;
+	private final Hdf5FileReader hdf5FileReader;
 
 	// globals
 	public final static RunConfig CONFIG = RunConfig.INSTANCE;
@@ -17,6 +18,7 @@ public class HDF5vXML {
 	public HDF5vXML() {
 		xmlFileGenerator = new XmlFileGenerator();
 		hdf5FileGenerator = new Hdf5FileGenerator();
+		hdf5FileReader = new Hdf5FileReader();
 	}
 
 	public static void main(String[] args) {
@@ -32,6 +34,22 @@ public class HDF5vXML {
 		}
 		// generate XML and HDF5 files
 		self.generateFiles();
+		
+		// read XML and HDF5 files
+		try {
+			self.readFiles();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// generate statistics CSV file
+		try {
+			DATA.toCsvFile(CONFIG.getTargetDir() + "HDF5vXML.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void generateFiles() {
@@ -48,12 +66,20 @@ public class HDF5vXML {
 			writeXmlFile(fd);
 			writeHdf5File(fd);
 		}
-		try {
-			DATA.toCsvFile(CONFIG.getTargetDir() + "HDF5vXML.csv");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	}
+	
+	private void readFiles() throws Exception {
+		
+		NumberFormat nfFileNum = NumberFormat.getIntegerInstance();
+		nfFileNum.setGroupingUsed(false);
+		nfFileNum.setMinimumIntegerDigits(6);
+
+		int i = 1;
+		FileDescriptor fd = new FileDescriptor();
+		fd.setFileName("File" + nfFileNum.format(i));
+		fd.setCols(CONFIG.getCols());
+
+		hdf5FileReader.read(fd);
 	}
 
 	private void writeXmlFile(FileDescriptor fileName) {

@@ -6,15 +6,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.hdf5vxml.StatsData.StatsInfo;
-
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
@@ -43,10 +39,8 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		FileFormat ff = FileFormat.getInstance(fileName);
 
 		// insert data entry for this file
-		StatsData.StatsInfo info = HDF5vXML.DATA.new StatsInfo();
-		info.setFileExt(arrayExt.substring(1));
-		HDF5vXML.DATA.putStatsInfo(fileDescriptor.getFileName() + arrayExt,
-				info);
+		HDF5vXML.DATA.createStatsInfo(fileDescriptor.getFileName() + arrayExt);
+		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + arrayExt, arrayExt.substring(1));
 
 		// array
 		ff.createGroup("ArrayGroup", null);
@@ -81,9 +75,8 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		FileFormat ff = FileFormat.getInstance(fileName);
 
 		// insert data entry for this file
-		StatsData.StatsInfo info = HDF5vXML.DATA.new StatsInfo();
-		info.setFileExt(binExt.substring(1));
-		HDF5vXML.DATA.putStatsInfo(fileDescriptor.getFileName() + binExt, info);
+		HDF5vXML.DATA.createStatsInfo(fileDescriptor.getFileName() + binExt);
+		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + binExt, binExt.substring(1));
 
 		// array
 		ff.createGroup("ArrayGroup", null);

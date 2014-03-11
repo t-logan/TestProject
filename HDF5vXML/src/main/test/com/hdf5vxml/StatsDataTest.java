@@ -11,24 +11,24 @@ import com.hdf5vxml.StatsData;
 public class StatsDataTest {
 	
 	@Test
-	public void putTest() {
-		StatsData.StatsInfo info = StatsData.INSTANCE.new StatsInfo();
-		info.setFileExt("ext");
-		info.setNumberOfPhotos(3);
-		info.setEmissionsSamples(6);
-		info.setSizeOnDiskInBytes(50000);
-		info.setBinaryBytes(1500);
-		info.setTimeToCreateInMilliseconds(445566);
-		info.setTimeToReadInMilliseconds(778899);
-		StatsData.INSTANCE.putStatsInfo("ABC", info);
+	public void putTest() throws IllegalAccessException {
+		String key = "ABC";
+		StatsData.INSTANCE.createStatsInfo(key);
+		StatsData.INSTANCE.setFileExt(key, "ext");
+		StatsData.INSTANCE.setNumberOfPhotos(key, 3);
+		StatsData.INSTANCE.setEmissionsSamples(key, 6);
+		StatsData.INSTANCE.setSizeOnDiskInBytes(key, 50000);
+		StatsData.INSTANCE.setBinaryBytes(key, 1500);
+		StatsData.INSTANCE.setTimeToCreateInMilliseconds(key, 445566);
+		StatsData.INSTANCE.setTimeToReadInMilliseconds(key, 778899);
 	}
 
 	@Test
 	public void getTest() {
-		StatsData.StatsInfo info = StatsData.INSTANCE.getStatsInfo("ABC");
-		assertTrue(info.getFileExt() == "ext");
-		assertTrue(info.getNumberOfPhotos() == 3);
-		assertTrue(info.getTimeToReadInMilliseconds() == 778899);
+		String key = "ABC";
+		assertTrue(StatsData.INSTANCE.getFileExt(key) == "ext");
+		assertTrue(StatsData.INSTANCE.getNumberOfPhotos(key) == 3);
+		assertTrue(StatsData.INSTANCE.getTimeToReadInMilliseconds(key) == 778899);
 	}
 
 	@Test

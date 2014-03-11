@@ -6,74 +6,67 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.hdf5vxml.StatsData.StatsInfo;
-
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.ScalarDS;
 
-public class Hdf5FileReader implements IFileGenerator {
+public class Hdf5FileReader implements IFileReader {
 
 	@Override
-	public void generate(FileDescriptor fileDescriptor) throws Exception {
-		writeArrayFile(fileDescriptor);
-		writeBinaryFile(fileDescriptor);
+	public void read(FileDescriptor fileDescriptor) throws Exception {
+		readArrayFile(fileDescriptor);
+		// readBinaryFile(fileDescriptor);
 	}
 
-	private void writeArrayFile(FileDescriptor fileDescriptor) throws Exception {
+	private void readArrayFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String arrayExt = ".hdf5a";
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + arrayExt;
 
-		// create an HDF5 dataset
-		int fid = H5.H5Fcreate(fileName, HDF5Constants.H5F_ACC_TRUNC,
-				HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-		if (fid >= 0)
-			H5.H5Fclose(fid);
 		FileFormat ff = FileFormat.getInstance(fileName);
 
-		// insert data entry for this file
-		StatsData.StatsInfo info = HDF5vXML.DATA.new StatsInfo();
-		info.setFileExt(arrayExt.substring(1));
-		HDF5vXML.DATA.putStatsInfo(fileDescriptor.getFileName() + arrayExt,
-				info);
+		long elapsedTime;
+		long startTime = System.currentTimeMillis();
 
-		// array
-		ff.createGroup("ArrayGroup", null);
+		// read numeric array data
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		write2DArray(2, 2, "2x2", ff, aGroup);
-		write2DArray(3, 3, "3x3", ff, aGroup);
-		write2DArray(10, 7, "10x7", ff, aGroup);
+		read2DArray(2, 2, "2x2", ff, aGroup);
+		read2DArray(3, 3, "3x3", ff, aGroup);
+		read2DArray(10, 7, "10x7", ff, aGroup);
 
-		// import three images into array format
-		ff.createGroup("ImageGroup", null);
-		Group pGroup = (Group) ff.get("ImageGroup");
-		importImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		importImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		// // read image array data
+		// ff.createGroup("ImageGroup", null);
+		// Group pGroup = (Group) ff.get("ImageGroup");
+		// importImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		// importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		// importImageFile("photo116.jpg", ff, pGroup,
+		// FileFormat.FILE_TYPE_HDF5);
+
+		elapsedTime = System.currentTimeMillis() - startTime;
+
+		// update read timing
+		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName()
+				+ arrayExt, elapsedTime);
 
 		ff.close();
 	}
 
-	private void writeBinaryFile(FileDescriptor fileDescriptor)
-			throws Exception {
+	private void readBinaryFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String binExt = ".hdf5b";
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + binExt;
 
-		// create an HDF5 dataset
+		// create an HDF5 data set
 		int fid = H5.H5Fcreate(fileName, HDF5Constants.H5F_ACC_TRUNC,
 				HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 		if (fid >= 0)
@@ -81,16 +74,16 @@ public class Hdf5FileReader implements IFileGenerator {
 		FileFormat ff = FileFormat.getInstance(fileName);
 
 		// insert data entry for this file
-		StatsData.StatsInfo info = HDF5vXML.DATA.new StatsInfo();
-		info.setFileExt(binExt.substring(1));
-		HDF5vXML.DATA.putStatsInfo(fileDescriptor.getFileName() + binExt, info);
+		HDF5vXML.DATA.createStatsInfo(fileDescriptor.getFileName() + binExt);
+		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + binExt,
+				binExt.substring(1));
 
 		// array
 		ff.createGroup("ArrayGroup", null);
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		write2DArray(2, 2, "2x2", ff, aGroup);
-		write2DArray(3, 3, "3x3", ff, aGroup);
-		write2DArray(10, 7, "10x7", ff, aGroup);
+		read2DArray(2, 2, "2x2", ff, aGroup);
+		read2DArray(3, 3, "3x3", ff, aGroup);
+		read2DArray(10, 7, "10x7", ff, aGroup);
 
 		// import three images in opaque format
 		ff.createGroup("ImageGroup", null);
@@ -111,58 +104,42 @@ public class Hdf5FileReader implements IFileGenerator {
 	 * @param cols
 	 *            the number of columns in the output array.
 	 * @param dsName
-	 *            the array dataset name.
+	 *            the array data set name.
 	 * @param hdfFile
 	 *            the HDF FileFormat descriptor.
 	 * @param pGroup
 	 *            the parent group name.
 	 */
-	private void write2DArray(int rows, int cols, String dsName,
+	private void read2DArray(int rows, int cols, String dsName,
 			FileFormat hdfFile, Group pGroup) throws Exception {
-
-		int fid = -1, sid = -1, did = -1, wid = -1;
-		int rank = 2;
-		long[] dimensions = { rows, cols };
-		double[][] values = new double[rows][cols];
-
-		// populate the array
-		double value = 1.0;
-		for (int row = 0; row < rows; row++) {
-			for (int col = 0; col < cols; col++) {
-				values[row][col] = value++;
-			}
-		}
+		int fid = -1, did = -1, rid = -1;
+		int[][] readValues = new int[rows][cols];
 
 		try {
-			fid = hdfFile.getFID();
+			// Open the existing file using default properties.
+			fid = H5.H5Fopen(hdfFile.getAbsolutePath(),
+					HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
 
-			// Create the data space for the dataset.
-			sid = H5.H5Screate_simple(rank, dimensions, null);
+			// get the id for the dataset
+			did = H5.H5Dopen(fid, pGroup + "/" + dsName);
 
-			// Create the int array dataset.
-			if ((fid >= 0) && (sid >= 0))
-				did = H5.H5Dcreate(fid, pGroup + "/" + dsName,
-						HDF5Constants.H5T_IEEE_F64BE, sid,
-						HDF5Constants.H5P_DEFAULT);
-			else
-				out.println("FAILED while creating the array dataset. fid="
-						+ fid + ", sid=" + sid);
-
-			// Write array to the dataset using default transfer properties.
-			wid = H5.H5Dwrite(did, HDF5Constants.H5T_NATIVE_DOUBLE,
+			// Read the 3x3 int array using default transfer properties.
+			rid = H5.H5Dread(did, HDF5Constants.H5T_NATIVE_INT,
 					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-					HDF5Constants.H5P_DEFAULT, values);
-			if (wid < 0)
-				out.println("write FAILED to 2x2 array, wid=" + wid);
+					HDF5Constants.H5P_DEFAULT, readValues);
+			if (rid < 0)
+				out.println("> readIntArray read FAILED on " + dsName
+						+ " array, rid=" + rid);
 
-			// End access to the data set and release resources used by it.
+			// End access to the dataset and release resources used by it.
 			if (did >= 0)
 				H5.H5Dclose(did);
-			// Terminate access to the data space.
-			if (sid >= 0)
-				H5.H5Sclose(sid);
+			// Close the file.
+			if (fid >= 0)
+				H5.H5Fclose(fid);
 		} catch (Throwable t) {
-			out.println("> Error writing array: " + t.getMessage());
+			out.println("> readIntArray FAILED, exception=" + t);
+			t.printStackTrace();
 			return;
 		}
 	}
