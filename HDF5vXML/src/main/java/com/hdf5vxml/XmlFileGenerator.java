@@ -1,9 +1,9 @@
 package com.hdf5vxml;
 
-public class XmlFileGenerator implements IFileWriter{
+public class XmlFileGenerator implements IFileGenerator{
 
 	@Override
-	public void writeFile(FileDescriptor fileName) throws Exception {
+	public void generate(FileDescriptor fileName) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

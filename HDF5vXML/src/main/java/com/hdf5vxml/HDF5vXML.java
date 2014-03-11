@@ -3,6 +3,7 @@ package com.hdf5vxml;
 import static java.lang.System.out;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 
 public class HDF5vXML {
 
@@ -38,13 +39,17 @@ public class HDF5vXML {
 		FileDescriptor fd = new FileDescriptor();
 		fd.setCols(CONFIG.getCols());
 
-		for (int i = 0; i < CONFIG.getFileCount(); i++) {
-			fd.setFileName("test" + i);
+		NumberFormat nfFileNum = NumberFormat.getIntegerInstance();
+		nfFileNum.setGroupingUsed(false);
+		nfFileNum.setMinimumIntegerDigits(6);
+
+		for (int i = 1; i <= CONFIG.getFileCount(); i++) {
+			fd.setFileName("File" + nfFileNum.format(i));
 			writeXmlFile(fd);
 			writeHdf5File(fd);
 		}
 		try {
-			DATA.toCsvFile(CONFIG.getTargetDir() + "stats.csv");
+			DATA.toCsvFile(CONFIG.getTargetDir() + "HDF5vXML.csv");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,12 +57,12 @@ public class HDF5vXML {
 	}
 
 	private void writeXmlFile(FileDescriptor fileName) {
-
+		// TODO
 	}
 
 	private void writeHdf5File(FileDescriptor fileName) {
 		try {
-			hdf5FileGenerator.writeFile(fileName);
+			hdf5FileGenerator.generate(fileName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

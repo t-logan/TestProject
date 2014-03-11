@@ -20,7 +20,7 @@ import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.ScalarDS;
 
-public class Hdf5FileGenerator implements IFileGenerator {
+public class Hdf5FileReader implements IFileGenerator {
 
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
