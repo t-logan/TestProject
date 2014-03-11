@@ -1,0 +1,2 @@
+fileName,fileExt,numberOfPhotos,emissionsSamples,sizeOnDiskInBytes,binaryBytes,timeToCreateInMilliseconds,timeToReadInMilliseconds
+ABC,ext,3,6,50000,1500,445566,778899
