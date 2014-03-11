@@ -14,6 +14,7 @@ import com.hdf5vxml.StatsData.StatsInfo;
 
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
+import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
@@ -23,9 +24,13 @@ public class Hdf5FileGenerator implements IFileWriter {
 
 	@Override
 	public void writeFile(FileDescriptor fileDescriptor) throws Exception {
+		writeArrayFile(fileDescriptor);
+		writeBinaryFile(fileDescriptor);
+	}
+
+	private void writeArrayFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String arrayExt = ".hdf5a";
-		String binExt = ".hdf5b";
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + arrayExt;
@@ -50,14 +55,52 @@ public class Hdf5FileGenerator implements IFileWriter {
 		write2DArray(3, 3, "3x3", ff, aGroup);
 		write2DArray(10, 7, "10x7", ff, aGroup);
 
-		// import three images
+		// import three images into array format
 		ff.createGroup("ImageGroup", null);
 		Group pGroup = (Group) ff.get("ImageGroup");
 		importImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		importImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		importImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 
-		importOpaqueImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		ff.close();
+	}
+
+	private void writeBinaryFile(FileDescriptor fileDescriptor)
+			throws Exception {
+
+		String binExt = ".hdf5b";
+
+		String fileName = HDF5vXML.CONFIG.getTargetDir()
+				+ fileDescriptor.getFileName() + binExt;
+
+		// create an HDF5 dataset
+		int fid = H5.H5Fcreate(fileName, HDF5Constants.H5F_ACC_TRUNC,
+				HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+		if (fid >= 0)
+			H5.H5Fclose(fid);
+		FileFormat ff = FileFormat.getInstance(fileName);
+
+		// insert data entry for this file
+		StatsData.StatsInfo info = HDF5vXML.DATA.new StatsInfo();
+		info.setFileExt(binExt.substring(1));
+		HDF5vXML.DATA.putStatsInfo(fileDescriptor.getFileName() + binExt, info);
+
+		// array
+		ff.createGroup("ArrayGroup", null);
+		Group aGroup = (Group) ff.get("ArrayGroup");
+		write2DArray(2, 2, "2x2", ff, aGroup);
+		write2DArray(3, 3, "3x3", ff, aGroup);
+		write2DArray(10, 7, "10x7", ff, aGroup);
+
+		// import three images in opaque format
+		ff.createGroup("ImageGroup", null);
+		Group pGroup = (Group) ff.get("ImageGroup");
+		importOpaqueImageFile("photo0.jpg", ff, pGroup,
+				FileFormat.FILE_TYPE_HDF5);
+		importOpaqueImageFile("photo1.jpg", ff, pGroup,
+				FileFormat.FILE_TYPE_HDF5);
+		importOpaqueImageFile("photo116.jpg", ff, pGroup,
+				FileFormat.FILE_TYPE_HDF5);
 
 		ff.close();
 	}
@@ -240,32 +283,52 @@ public class Hdf5FileGenerator implements IFileWriter {
 	 */
 	private void importOpaqueImageFile(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
-		
-		String FILE = "opaque.h5";
-		String DATASET = imgFileName;
-		int DIM0 = 4;
-		int LEN = 7;
-		
+
 		int space, dtype, dset;
 		int status;
-		long[] dims = {DIM0};
-		int len;
-		int[] data = new int[DIM0 * LEN];
-		String value = "OPAQUE";
-		int ndims, i, j;
-				
-		// int file = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-		
-		dtype = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, LEN);
+
+		// read image file
+		BufferedImage image = null;
+		try {
+			BufferedInputStream in = new BufferedInputStream(
+					new FileInputStream(imgFileName));
+			image = ImageIO.read(in);
+			in.close();
+		} catch (Throwable err) {
+			image = null;
+		}
+
+		if (image == null)
+			throw new UnsupportedOperationException("Failed to read image: "
+					+ imgFileName);
+
+		int h = image.getHeight();
+		int w = image.getWidth();
+		long[] dims = { h * w };
+		int[] data = new int[h * w];
+
+		// copy the image data
+		int idx = 0;
+		int rgb = 0;
+		for (int i = 0; i < h; i++) {
+			for (int j = 0; j < w; j++) {
+				rgb = image.getRGB(j, i);
+				data[idx++] = rgb;
+			}
+		}
+
+		// think 1 should be h * w, but does not work (equals length)
+		dtype = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, 1);
 		status = H5.H5Tset_tag(dtype, "Tag");
-		
+
 		space = H5.H5Screate_simple(1, dims, null);
-		dset = H5.H5Dcreate(hdfFile.getFID(), DATASET, dtype, space, HDF5Constants.H5P_DEFAULT);
-		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
-		
+		dset = H5.H5Dcreate(hdfFile.getFID(), pGroup + "/" + imgFileName,
+				dtype, space, HDF5Constants.H5P_DEFAULT);
+		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL,
+				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
+
 		status = H5.H5Dclose(dset);
 		status = H5.H5Sclose(space);
 		status = H5.H5Tclose(dtype);
-		//status = H5.H5Fclose(file);
 	}
 }
