@@ -14,6 +14,7 @@ import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
+import ncsa.hdf.object.HObject;
 
 public class Hdf5FileReader implements IFileReader {
 
@@ -23,6 +24,11 @@ public class Hdf5FileReader implements IFileReader {
 		readOpaqueFile(fileDescriptor);
 	}
 
+	/**
+	 * Reads all the data sets in an image array file.
+	 * @param fileDescriptor
+	 * @throws Exception
+	 */
 	private void readImageArrayFile(FileDescriptor fileDescriptor)
 			throws Exception {
 
@@ -38,9 +44,9 @@ public class Hdf5FileReader implements IFileReader {
 
 		// read numeric array data
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DDoubleArray(2, 2, "2x2", ff, aGroup);
-		read2DDoubleArray(3, 3, "3x3", ff, aGroup);
-		read2DDoubleArray(10, 7, "10x7", ff, aGroup);
+		read2DArrayDataset(2, 2, "2x2", ff, aGroup);
+//		read2DArrayDataset(3, 3, "3x3", ff, aGroup);
+//		read2DArrayDataset(10, 7, "10x7", ff, aGroup);
 
 		// TODO: Here
 		// read image array data
@@ -58,6 +64,11 @@ public class Hdf5FileReader implements IFileReader {
 		ff.close();
 	}
 
+	/**
+	 * Reads all the data sets in an opaque image file.
+	 * @param fileDescriptor
+	 * @throws Exception
+	 */
 	private void readOpaqueFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String binExt = ".hdf5b";
@@ -72,15 +83,15 @@ public class Hdf5FileReader implements IFileReader {
 
 		// array
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DDoubleArray(2, 2, "2x2", ff, aGroup);
-		read2DDoubleArray(3, 3, "3x3", ff, aGroup);
-		read2DDoubleArray(10, 7, "10x7", ff, aGroup);
+		read2DArrayDataset(2, 2, "2x2", ff, aGroup);
+		read2DArrayDataset(3, 3, "3x3", ff, aGroup);
+		read2DArrayDataset(10, 7, "10x7", ff, aGroup);
 
 		// read three images in opaque format
 		Group pGroup = (Group) ff.get("ImageGroup");
-		readOpaqueImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		readOpaqueImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		readOpaqueImageFile("photo116.jpg", ff, pGroup,
+		readOpaqueImageDataset("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		readOpaqueImageDataset("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		readOpaqueImageDataset("photo116.jpg", ff, pGroup,
 				FileFormat.FILE_TYPE_HDF5);
 
 		elapsedTime = System.currentTimeMillis() - startTime;
@@ -104,7 +115,7 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param pGroup
 	 *            the parent group name.
 	 */
-	private void read2DDoubleArray(int rows, int cols, String dsName,
+	private void read2DArrayDataset(int rows, int cols, String dsName,
 			FileFormat hdfFile, Group pGroup) throws Exception {
 		int fid = -1, did = -1, rid = -1;
 		int[][] readValues = new int[rows][cols];
@@ -117,7 +128,7 @@ public class Hdf5FileReader implements IFileReader {
 			// get the id for the dataset
 			did = H5.H5Dopen(fid, pGroup + "/" + dsName);
 
-			// Read the 3x3 int array using default transfer properties.
+			// Read the array using default transfer properties.
 			rid = H5.H5Dread(did, HDF5Constants.H5T_NATIVE_INT,
 					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
 					HDF5Constants.H5P_DEFAULT, readValues);
@@ -153,88 +164,15 @@ public class Hdf5FileReader implements IFileReader {
 	 */
 	private void readImageFile(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
-		File imgFile = null;
-
-		if (imgFileName == null) {
-			throw new NullPointerException("Source image file is null.");
-		} else if (!(imgFile = new File(imgFileName)).exists()) {
-			throw new NullPointerException("Source image file does not exist.");
-		} else if (hdfFile == null) {
-			throw new NullPointerException("Target HDF file is null.");
-		}
-
-		if (!(hdfFileType.equals(FileFormat.FILE_TYPE_HDF4) || hdfFileType
-				.equals(FileFormat.FILE_TYPE_HDF5))) {
-			throw new UnsupportedOperationException(
-					"Unsupported destination file type.");
-		}
-
-		// read image file
-		BufferedImage image = null;
-		try {
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(imgFileName));
-			image = ImageIO.read(in);
-			in.close();
-		} catch (Throwable err) {
-			image = null;
-		}
-
-		if (image == null)
-			throw new UnsupportedOperationException("Failed to read image: "
-					+ imgFileName);
-
-		int h = image.getHeight();
-		int w = image.getWidth();
-		byte[] data = null;
-
-		// allocate buffer
-		try {
-			data = new byte[3 * h * w];
-		} catch (OutOfMemoryError err) {
-			err.printStackTrace();
-			throw new RuntimeException("Out of memory error.");
-		}
-
-		// construct HDF image in memory
-		int idx = 0;
-		int rgb = 0;
-		for (int i = 0; i < h; i++) {
-			for (int j = 0; j < w; j++) {
-				rgb = image.getRGB(j, i);
-				data[idx++] = (byte) (rgb >> 16);
-				data[idx++] = (byte) (rgb >> 8);
-				data[idx++] = (byte) rgb;
-			}
-		}
-
-		long[] dims = null;
-		Datatype type = null;
-		String imgName = imgFile.getName();
-
-		if (hdfFileType.equals(FileFormat.FILE_TYPE_HDF5)) {
-			hdfFile = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
-			long[] h5dims = { h, w, 3 }; // RGB pixel interlace
-			dims = h5dims;
-		} else if (hdfFileType.equals(FileFormat.FILE_TYPE_HDF4)) {
-			hdfFile = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF4);
-			long[] h4dims = { w, h, 3 }; // RGB pixel interlace
-			dims = h4dims;
-		} else {
-			hdfFile = null;
-		}
-
-		if (hdfFile != null) {
-			type = hdfFile.createDatatype(Datatype.CLASS_CHAR, 1,
-					Datatype.NATIVE, Datatype.SIGN_NONE);
-//			hdfFile.createImage(imgName, pGroup, type, dims, null, null, -1, 3,
-//					ScalarDS.INTERLACE_PIXEL, data);
-		}
-
-		// free memory
-		data = null;
-		image = null;
-		Runtime.getRuntime().gc();
+				
+		HObject ho = hdfFile.get("/ImageGroup/" + imgFileName);
+//		System.out.println(ho.getFullName());
+//		System.out.println(ho.getMetadata());
+//		System.out.println("Class=" + ho.getClass());
+		
+		// read the byte array
+		Object data = ((ncsa.hdf.object.h5.H5ScalarDS) ho).getData();
+//		System.out.println(data.getClass());
 	}
 
 	/**
@@ -251,7 +189,7 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param hdfFileType
 	 *            the type of file converted to.
 	 */
-	private void readOpaqueImageFile(String imgFileName, FileFormat hdfFile,
+	private void readOpaqueImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 
 		int space, dtype, dset;
@@ -263,6 +201,7 @@ public class Hdf5FileReader implements IFileReader {
 				HDF5Constants.H5P_DEFAULT);
 		dtype = H5.H5Dget_type(dset);
 		int len = H5.H5Tget_size(dtype);
+		//System.out.println("? len=" + len);
 		String tag = H5.H5Tget_tag(dtype);
 
 		space = H5.H5Dget_space(dset);

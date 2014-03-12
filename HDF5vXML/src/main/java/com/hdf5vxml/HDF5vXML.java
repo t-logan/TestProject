@@ -57,6 +57,8 @@ public class HDF5vXML {
 
 		for (int i = 1; i <= CONFIG.getFileCount(); i++) {
 			fd.setFileName("File" + nfFileNum.format(i));
+			xmlFileGenerator.generate(fd);
+			xmlFileReader.read(fd);
 			hdf5FileGenerator.generate(fd);
 			hdf5FileReader.read(fd);
 		}
