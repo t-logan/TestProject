@@ -26,13 +26,8 @@ public class XmlFileGenerator implements IFileGenerator{
 
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
-		writeXmlFiles(fileDescriptor)
-	}
-
-	private void writeXmlFiles(FileDescriptor fileDescriptor) throws Exception {
 		emitXml(fileDescriptor, builder)
 	}
-
 
 	/**
 	 * This is where the interesting XML is generated.
@@ -42,12 +37,16 @@ public class XmlFileGenerator implements IFileGenerator{
 	 */
 	private void emitXml(FileDescriptor fd, groovy.xml.StreamingMarkupBuilder builder) {
 
-		// output XML file
-		FileWriter xmlFile = new FileWriter(new File(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml"))
 		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + XML_EXT);
 		HDF5vXML.DATA.setFileExt(fd.getFileName() + XML_EXT, XML_EXT.substring(1));
+		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + XML_EXT, fd.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + XML_EXT, fd.getRows());
 
-		// add reference to the schema
+		xmlWriteStartTime = System.currentTimeMillis();
+
+		// output XML file
+		FileWriter xmlFile = new FileWriter(new File(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml"))
+
 		genXmlHeader(xmlFile, builder);
 
 		// build the XML
@@ -76,18 +75,27 @@ public class XmlFileGenerator implements IFileGenerator{
 		// write the final tag and close the file
 		xmlFile.write("</testFile>");
 		xmlFile.close()
+		
+		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + XML_EXT, totalImageBytes);
 
 		// compute times
 		xmlWriteTime = System.currentTimeMillis() - xmlWriteStartTime;
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + XML_EXT, xmlWriteTime);
 
 		// time the zip process ...
 		cxmlWriteStartTime = System.currentTimeMillis();
+
 		zipper.zip(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml",
 				HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xmlc");
-		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + XMLC_EXT);
-		HDF5vXML.DATA.setFileExt(fd.getFileName() + XMLC_EXT, XMLC_EXT.substring(1));
 
 		cxmlWriteTime = (System.currentTimeMillis() - cxmlWriteStartTime) + xmlWriteTime;
+
+		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + XMLC_EXT);
+		HDF5vXML.DATA.setFileExt(fd.getFileName() + XMLC_EXT, XMLC_EXT.substring(1));
+		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + XMLC_EXT, fd.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + XMLC_EXT, fd.getRows());
+		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + XMLC_EXT, totalImageBytes);
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + XMLC_EXT, cxmlWriteTime);
 	}
 
 	/**
@@ -99,8 +107,7 @@ public class XmlFileGenerator implements IFileGenerator{
 		def xmlHeader = { mkp.xmlDeclaration() }
 		xmlFile << builder.bind(xmlHeader)
 		// write root tag with schema reference
-		xmlFile.write("<testFile xmlns=\"http://www.epa.gov\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-				"xsi:schemaLocation=\"http://www.epa.gov vehicleEmissions.xsd\">");
+		xmlFile.write("<testFile xmlns=\"http://www.epa.gov\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
 	}
 
 	/**

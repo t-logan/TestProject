@@ -93,9 +93,11 @@ public class HDF5vXML {
 			if(i % 50 == 1)
 				out.print(".");
 
+			// generate and read the XML files
 			xmlFileGenerator.generate(fd);
 			xmlFileReader.read(fd);
 			
+			// generate and read the HDF5 files
 			hdf5FileGenerator.generate(fd);
 			hdf5FileReader.read(fd);
 		}
