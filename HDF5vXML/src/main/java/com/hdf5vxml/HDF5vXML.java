@@ -4,7 +4,7 @@ import static java.lang.System.out;
 
 import java.text.NumberFormat;
 
-import com.androtopia.RandomGaussianGenerator;
+import com.hdf5vxml.RandomGaussianGenerator;
 
 public class HDF5vXML {
 

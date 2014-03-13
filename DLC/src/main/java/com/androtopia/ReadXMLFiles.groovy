@@ -16,6 +16,8 @@ import java.util.Scanner;
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.DirectoryWalker
 
+import com.hdf5vxml.Zipper;
+
 /**
  * This is a Groovy program that writes the vehicleEmissions.xml file from CSV input 
  * created by the GenerateCSVFile.java program.

@@ -19,6 +19,8 @@ import java.util.StringTokenizer;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
+import com.hdf5vxml.RandomGaussianGenerator;
+
 public class GenerateCSVFiles {
 
 	private static final String HEADER = "VIN_NUMBER,MANUFACTURER,MODEL_YEAR,VEHICLE_TYPE,OIL_CHANGE_DISTANCE,"

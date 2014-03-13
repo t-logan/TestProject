@@ -5,6 +5,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.hdf5vxml.RandomGaussianGenerator;
+
 public class TestRandomGaussianGenerator {
 
 	@Test
