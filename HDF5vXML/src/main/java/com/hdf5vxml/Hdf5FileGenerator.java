@@ -19,24 +19,25 @@ import ncsa.hdf.object.ScalarDS;
 public class Hdf5FileGenerator implements IFileGenerator {
 
 	private final static String ARRAY_EXT = ".hdf5a";
-	private final static String OPAQUE_EXT = ".hdf5b";
+	private final static String BINARY_EXT = ".hdf5b";
 
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
-		
+
 		// write array image file
 		long startTime = System.currentTimeMillis();
 		writeArrayFile(fileDescriptor);
 		long elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fileDescriptor.getFileName()
-				+ ARRAY_EXT, elapsedTime);
-		
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
+				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
+
 		// write opaque image file
 		startTime = System.currentTimeMillis();
 		writeBinaryFile(fileDescriptor);
 		elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fileDescriptor.getFileName()
-				+ OPAQUE_EXT, elapsedTime);	}
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
+				fileDescriptor.getFileName() + BINARY_EXT, elapsedTime);
+	}
 
 	private void writeArrayFile(FileDescriptor fileDescriptor) throws Exception {
 
@@ -65,7 +66,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		ff.createGroup("ImageGroup", null);
 		Group pGroup = (Group) ff.get("ImageGroup");
 		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-			importImageFile(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
+			importImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
 					+ ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		}
 		ff.close();
@@ -75,7 +76,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			throws Exception {
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
-				+ fileDescriptor.getFileName() + OPAQUE_EXT;
+				+ fileDescriptor.getFileName() + BINARY_EXT;
 
 		// create an HDF5 dataset
 		int fid = H5.H5Fcreate(fileName, HDF5Constants.H5F_ACC_TRUNC,
@@ -85,9 +86,10 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		FileFormat ff = FileFormat.getInstance(fileName);
 
 		// insert data entry for this file
-		HDF5vXML.DATA.createStatsInfo(fileDescriptor.getFileName() + OPAQUE_EXT);
-		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + OPAQUE_EXT,
-				OPAQUE_EXT.substring(1));
+		HDF5vXML.DATA
+				.createStatsInfo(fileDescriptor.getFileName() + BINARY_EXT);
+		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + BINARY_EXT,
+				BINARY_EXT.substring(1));
 
 		// array
 		ff.createGroup("ArrayGroup", null);
@@ -99,7 +101,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		ff.createGroup("ImageGroup", null);
 		Group pGroup = (Group) ff.get("ImageGroup");
 		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-			importOpaqueImageFile(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
+			importOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
 					+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		}
 		ff.close();
@@ -181,7 +183,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 	 * @param hdfFileType
 	 *            the type of file converted to.
 	 */
-	private void importImageFile(String imgFileName, FileFormat hdfFile,
+	private void importImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 		File imgFile = null;
 
@@ -281,7 +283,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 	 * @param hdfFileType
 	 *            the type of file converted to.
 	 */
-	private void importOpaqueImageFile(String imgFileName, FileFormat hdfFile,
+	private void importOpaqueImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 
 		int space, dtype, dset;

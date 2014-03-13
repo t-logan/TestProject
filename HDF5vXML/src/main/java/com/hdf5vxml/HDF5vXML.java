@@ -86,7 +86,7 @@ public class HDF5vXML {
 			xmlFileGenerator.generate(fd);
 			xmlFileReader.read(fd);
 			hdf5FileGenerator.generate(fd);
-			// hdf5FileReader.read(fd);
+			hdf5FileReader.read(fd);
 		}
 	}
 

@@ -9,10 +9,25 @@ import ncsa.hdf.object.HObject;
 
 public class Hdf5FileReader implements IFileReader {
 
+	private final static String ARRAY_EXT = ".hdf5a";
+	private final static String BINARY_EXT = ".hdf5b";
+
 	@Override
 	public void read(FileDescriptor fileDescriptor) throws Exception {
-		readImageArrayFile(fileDescriptor);
-		readOpaqueFile(fileDescriptor);
+		
+		// read array image file
+		long startTime = System.currentTimeMillis();
+		readArrayFile(fileDescriptor);
+		long elapsedTime = System.currentTimeMillis() - startTime;
+		HDF5vXML.DATA.setTimeToReadInMilliseconds(
+				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
+		
+		// read opaque image file
+		startTime = System.currentTimeMillis();
+		readBinaryFile(fileDescriptor);
+		elapsedTime = System.currentTimeMillis() - startTime;
+		HDF5vXML.DATA.setTimeToReadInMilliseconds(
+				fileDescriptor.getFileName() + BINARY_EXT, elapsedTime);
 	}
 
 	/**
@@ -20,38 +35,25 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param fileDescriptor
 	 * @throws Exception
 	 */
-	private void readImageArrayFile(FileDescriptor fileDescriptor)
+	private void readArrayFile(FileDescriptor fileDescriptor)
 			throws Exception {
 
-		String arrayExt = ".hdf5a";
-
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
-				+ fileDescriptor.getFileName() + arrayExt;
+				+ fileDescriptor.getFileName() + ARRAY_EXT;
 
 		FileFormat ff = FileFormat.getInstance(fileName);
 
-		long elapsedTime;
-		long startTime = System.currentTimeMillis();
-
 		// read numeric array data
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DArrayDataset(2, 2, "2x2", ff, aGroup);
-//		read2DArrayDataset(3, 3, "3x3", ff, aGroup);
-//		read2DArrayDataset(10, 7, "10x7", ff, aGroup);
+		read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
+				"2DArray", ff, aGroup);
 
-		// TODO: Here
 		// read image array data
 		Group pGroup = (Group) ff.get("ImageGroup");
-		readImageFile("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-//		readImageFile("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-//		readImageFile("photo116.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-
-		elapsedTime = System.currentTimeMillis() - startTime;
-
-		// update read timing
-		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName()
-				+ arrayExt, elapsedTime);
-
+		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
+			readImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
+					+ ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		}
 		ff.close();
 	}
 
@@ -60,37 +62,24 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param fileDescriptor
 	 * @throws Exception
 	 */
-	private void readOpaqueFile(FileDescriptor fileDescriptor) throws Exception {
-
-		String binExt = ".hdf5b";
+	private void readBinaryFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
-				+ fileDescriptor.getFileName() + binExt;
+				+ fileDescriptor.getFileName() + BINARY_EXT;
 
 		FileFormat ff = FileFormat.getInstance(fileName);
 
-		long elapsedTime;
-		long startTime = System.currentTimeMillis();
-
 		// array
 		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DArrayDataset(2, 2, "2x2", ff, aGroup);
-		read2DArrayDataset(3, 3, "3x3", ff, aGroup);
-		read2DArrayDataset(10, 7, "10x7", ff, aGroup);
+		read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
+				"2DArray", ff, aGroup);
 
 		// read three images in opaque format
 		Group pGroup = (Group) ff.get("ImageGroup");
-		readOpaqueImageDataset("photo0.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		readOpaqueImageDataset("photo1.jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
-		readOpaqueImageDataset("photo116.jpg", ff, pGroup,
-				FileFormat.FILE_TYPE_HDF5);
-
-		elapsedTime = System.currentTimeMillis() - startTime;
-
-		// update read timing
-		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName()
-				+ binExt, elapsedTime);
-
+		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
+			readOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
+					+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		}
 		ff.close();
 	}
 
@@ -106,7 +95,7 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param pGroup
 	 *            the parent group name.
 	 */
-	private void read2DArrayDataset(int rows, int cols, String dsName,
+	private void read2DArray(int rows, int cols, String dsName,
 			FileFormat hdfFile, Group pGroup) throws Exception {
 		int fid = -1, did = -1, rid = -1;
 		int[][] readValues = new int[rows][cols];
@@ -153,10 +142,10 @@ public class Hdf5FileReader implements IFileReader {
 	 * @param hdfFileType
 	 *            the type of file converted to.
 	 */
-	private void readImageFile(String imgFileName, FileFormat hdfFile,
+	private void readImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 				
-		HObject ho = hdfFile.get("/" + pGroup + "/" + imgFileName);
+		HObject ho = hdfFile.get("/" + pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')));
 //		System.out.println(ho.getFullName());
 //		System.out.println(ho.getMetadata());
 //		System.out.println("Class=" + ho.getClass());
@@ -188,7 +177,7 @@ public class Hdf5FileReader implements IFileReader {
 		long[] DIMS = { 1 };
 
 		// read image file
-		dset = H5.H5Dopen(hdfFile.getFID(), "/ImageGroup/" + imgFileName,
+		dset = H5.H5Dopen(hdfFile.getFID(), pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')),
 				HDF5Constants.H5P_DEFAULT);
 		dtype = H5.H5Dget_type(dset);
 		int len = H5.H5Tget_size(dtype);
