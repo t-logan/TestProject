@@ -62,6 +62,10 @@ public class RunConfig {
 
 			targetDir = props.getProperty(TARGET_DIR);
 			photoDir = props.getProperty(PHOTO_DIR);
+			
+			if(cols == 0) {
+				throw new Exception("array.col must be greater than 0.");	
+			}
 
 			if (targetDir == null || photoDir == null) {
 				throw new Exception("Missing properties.");

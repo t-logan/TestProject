@@ -14,51 +14,56 @@ public class Hdf5FileReader implements IFileReader {
 
 	@Override
 	public void read(FileDescriptor fileDescriptor) throws Exception {
-		
+
 		// read array image file
 		long startTime = System.currentTimeMillis();
 		readArrayFile(fileDescriptor);
 		long elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToReadInMilliseconds(
-				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
-		
+		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName()
+				+ ARRAY_EXT, elapsedTime);
+
 		// read opaque image file
 		startTime = System.currentTimeMillis();
 		readBinaryFile(fileDescriptor);
 		elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToReadInMilliseconds(
-				fileDescriptor.getFileName() + BINARY_EXT, elapsedTime);
+		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName()
+				+ BINARY_EXT, elapsedTime);
 	}
 
 	/**
 	 * Reads all the data sets in an image array file.
+	 * 
 	 * @param fileDescriptor
 	 * @throws Exception
 	 */
-	private void readArrayFile(FileDescriptor fileDescriptor)
-			throws Exception {
+	private void readArrayFile(FileDescriptor fileDescriptor) throws Exception {
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + ARRAY_EXT;
 
 		FileFormat ff = FileFormat.getInstance(fileName);
 
-		// read numeric array data
-		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
-				"2DArray", ff, aGroup);
+		// read 2D data
+		if (HDF5vXML.CONFIG.getMeanRows() > 0) {
+			Group aGroup = (Group) ff.get("ArrayGroup");
+			read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
+					"2DArray", ff, aGroup);
+		}
 
 		// read image array data
-		Group pGroup = (Group) ff.get("ImageGroup");
-		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-			readImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
-					+ ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
+			Group pGroup = (Group) ff.get("ImageGroup");
+			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
+				readImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
+						+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+			}
 		}
 		ff.close();
 	}
 
 	/**
 	 * Reads all the data sets in an opaque image file.
+	 * 
 	 * @param fileDescriptor
 	 * @throws Exception
 	 */
@@ -69,16 +74,21 @@ public class Hdf5FileReader implements IFileReader {
 
 		FileFormat ff = FileFormat.getInstance(fileName);
 
-		// array
-		Group aGroup = (Group) ff.get("ArrayGroup");
-		read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
-				"2DArray", ff, aGroup);
+		// 2D array
+		if (HDF5vXML.CONFIG.getMeanRows() > 0) {
+			Group aGroup = (Group) ff.get("ArrayGroup");
+			read2DArray(fileDescriptor.getRows(), fileDescriptor.getCols(),
+					"2DArray", ff, aGroup);
+		}
 
 		// read three images in opaque format
-		Group pGroup = (Group) ff.get("ImageGroup");
-		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-			readOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
-					+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
+			Group pGroup = (Group) ff.get("ImageGroup");
+			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
+				readOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/"
+						+ "photo" + i + ".jpg", ff, pGroup,
+						FileFormat.FILE_TYPE_HDF5);
+			}
 		}
 		ff.close();
 	}
@@ -144,15 +154,16 @@ public class Hdf5FileReader implements IFileReader {
 	 */
 	private void readImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
-				
-		HObject ho = hdfFile.get("/" + pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')));
-//		System.out.println(ho.getFullName());
-//		System.out.println(ho.getMetadata());
-//		System.out.println("Class=" + ho.getClass());
-		
+
+		HObject ho = hdfFile.get("/" + pGroup
+				+ imgFileName.substring(imgFileName.lastIndexOf('/')));
+		// System.out.println(ho.getFullName());
+		// System.out.println(ho.getMetadata());
+		// System.out.println("Class=" + ho.getClass());
+
 		// read the byte array
 		Object data = ((ncsa.hdf.object.h5.H5ScalarDS) ho).getData();
-//		System.out.println(data.getClass());
+		// System.out.println(data.getClass());
 	}
 
 	/**
@@ -177,11 +188,12 @@ public class Hdf5FileReader implements IFileReader {
 		long[] DIMS = { 1 };
 
 		// read image file
-		dset = H5.H5Dopen(hdfFile.getFID(), pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')),
+		dset = H5.H5Dopen(hdfFile.getFID(),
+				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')),
 				HDF5Constants.H5P_DEFAULT);
 		dtype = H5.H5Dget_type(dset);
 		int len = H5.H5Tget_size(dtype);
-		//System.out.println("? len=" + len);
+		// System.out.println("? len=" + len);
 		String tag = H5.H5Tget_tag(dtype);
 
 		space = H5.H5Dget_space(dset);
