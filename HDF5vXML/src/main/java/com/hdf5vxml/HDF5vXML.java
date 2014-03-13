@@ -104,12 +104,11 @@ public class HDF5vXML {
 	private int getVariableNumberOfRows() {
 		// rows suppressed?
 		if (CONFIG.getMeanRows() == 0)
-			return 1;
+			return 0;
 
 		Double x = rowsRandGenerator.getNextScaledGaussian();
-		// insure that there is at least one
 		if (x < 1)
-			return 1;
+			return 0;
 		else
 			return (int) Math.round(x);
 	}
@@ -125,9 +124,8 @@ public class HDF5vXML {
 			return 0;
 
 		Double x = photosRandGenerator.getNextScaledGaussian();
-		// insure that there is at least one
 		if (x < 1)
-			return 1;
+			return 0;
 		else
 			return (int) Math.round(x);
 	}
