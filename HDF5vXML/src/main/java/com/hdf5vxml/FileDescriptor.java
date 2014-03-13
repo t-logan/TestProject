@@ -3,9 +3,9 @@ package com.hdf5vxml;
 public class FileDescriptor {
 
 	private String fileName;
-	private long rows;
+	private int rows;
 	private int cols;
-	private long numberOfPhotos;
+	private int numberOfPhotos;
 
 	public String getFileName() {
 		return fileName;
@@ -15,11 +15,11 @@ public class FileDescriptor {
 		this.fileName = fileName;
 	}
 
-	public long getRows() {
+	public int getRows() {
 		return rows;
 	}
 
-	public void setRows(long rows) {
+	public void setRows(int rows) {
 		this.rows = rows;
 	}
 
@@ -31,11 +31,11 @@ public class FileDescriptor {
 		this.cols = cols;
 	}
 
-	public long getNumberOfPhotos() {
+	public int getNumberOfPhotos() {
 		return numberOfPhotos;
 	}
 
-	public void setNumberOfPhotos(long numberOfPhotos) {
+	public void setNumberOfPhotos(int numberOfPhotos) {
 		this.numberOfPhotos = numberOfPhotos;
 	}
 

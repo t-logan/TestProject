@@ -86,7 +86,7 @@ public class HDF5vXML {
 			xmlFileGenerator.generate(fd);
 			xmlFileReader.read(fd);
 			hdf5FileGenerator.generate(fd);
-			hdf5FileReader.read(fd);
+			// hdf5FileReader.read(fd);
 		}
 	}
 
@@ -95,17 +95,17 @@ public class HDF5vXML {
 	 * 
 	 * @return the number of samples.
 	 */
-	private long getVariableNumberOfRows() {
+	private int getVariableNumberOfRows() {
 		// rows suppressed?
 		if (CONFIG.getMeanRows() == 0)
-			return 1L;
+			return 1;
 
 		Double x = rowsRandGenerator.getNextScaledGaussian();
 		// insure that there is at least one
 		if (x < 1)
-			return 1L;
+			return 1;
 		else
-			return Math.round(x);
+			return (int) Math.round(x);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class HDF5vXML {
 	 * 
 	 * @return the number of photos.
 	 */
-	private long getVariableNumberOfPhotos() {
+	private int getVariableNumberOfPhotos() {
 		// photos suppressed?
 		if (CONFIG.getMeanPhotos() == 0)
 			return 0;
@@ -121,8 +121,8 @@ public class HDF5vXML {
 		Double x = photosRandGenerator.getNextScaledGaussian();
 		// insure that there is at least one
 		if (x < 1)
-			return 1L;
+			return 1;
 		else
-			return Math.round(x);
+			return (int) Math.round(x);
 	}
 }
