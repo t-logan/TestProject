@@ -30,6 +30,10 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		long elapsedTime = System.currentTimeMillis() - startTime;
 		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
 				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
+		HDF5vXML.DATA.setNumberOfPhotos(
+				fileDescriptor.getFileName() + ARRAY_EXT, fileDescriptor.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(
+				fileDescriptor.getFileName() + ARRAY_EXT, fileDescriptor.getRows());
 
 		// write opaque image file
 		startTime = System.currentTimeMillis();
@@ -37,6 +41,10 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		elapsedTime = System.currentTimeMillis() - startTime;
 		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
 				fileDescriptor.getFileName() + BINARY_EXT, elapsedTime);
+		HDF5vXML.DATA.setNumberOfPhotos(
+				fileDescriptor.getFileName() + BINARY_EXT, fileDescriptor.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(
+				fileDescriptor.getFileName() + BINARY_EXT, fileDescriptor.getRows());
 	}
 
 	private void writeArrayFile(FileDescriptor fileDescriptor) throws Exception {
