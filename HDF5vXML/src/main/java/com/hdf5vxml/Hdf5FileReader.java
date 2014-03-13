@@ -1,17 +1,8 @@
 package com.hdf5vxml;
 
 import static java.lang.System.out;
-
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-
-import javax.imageio.ImageIO;
-
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
-import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.HObject;
@@ -165,7 +156,7 @@ public class Hdf5FileReader implements IFileReader {
 	private void readImageFile(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 				
-		HObject ho = hdfFile.get("/ImageGroup/" + imgFileName);
+		HObject ho = hdfFile.get("/" + pGroup + "/" + imgFileName);
 //		System.out.println(ho.getFullName());
 //		System.out.println(ho.getMetadata());
 //		System.out.println("Class=" + ho.getClass());

@@ -18,7 +18,7 @@ public class RunConfig {
 
 	private String targetDir;
 	private String photoDir;
-	
+
 	private static final String FILE_COUNT = "file.count";
 	private static final String ARRAY_ROW_MEAN = "array.row.mean";
 	private static final String ARRAY_ROW_SD = "array.row.sd";
@@ -52,13 +52,12 @@ public class RunConfig {
 				throw new Exception("Missing properties.");
 			}
 
-			fileCount = Integer
-					.parseInt(props.getProperty(FILE_COUNT).trim());
-			meanRows = Integer.parseInt(props.getProperty(ARRAY_ROW_MEAN).trim());
+			fileCount = Integer.parseInt(props.getProperty(FILE_COUNT).trim());
+			meanRows = Integer.parseInt(props.getProperty(ARRAY_ROW_MEAN)
+					.trim());
 			sdRows = Integer.parseInt(props.getProperty(ARRAY_ROW_SD).trim());
 			cols = Integer.parseInt(props.getProperty(ARRAY_COL).trim());
-			meanPhotos = Integer.parseInt(props.getProperty(PHOTO_MEAN)
-					.trim());
+			meanPhotos = Integer.parseInt(props.getProperty(PHOTO_MEAN).trim());
 			sdPhotos = Integer.parseInt(props.getProperty(PHOTO_SD).trim());
 
 			targetDir = props.getProperty(TARGET_DIR);
@@ -67,16 +66,16 @@ public class RunConfig {
 			if (targetDir == null || photoDir == null) {
 				throw new Exception("Missing properties.");
 			}
-			
+
 			// normalize file paths
 			targetDir = targetDir.replaceAll("\\\\", "/");
 			photoDir = photoDir.replaceAll("\\\\", "/");
-			
-			if(!targetDir.endsWith("/"))
+
+			if (!targetDir.endsWith("/"))
 				targetDir += "/";
-			if(!photoDir.endsWith("/"))
+			if (!photoDir.endsWith("/"))
 				photoDir += "/";
-			
+
 			return true;
 		} catch (Exception e) {
 			out.println("Unable to load properties from file: " + propFileName
@@ -115,5 +114,12 @@ public class RunConfig {
 
 	public String getPhotoDir() {
 		return photoDir;
+	}
+
+	public String toString() {
+		return "fileCount=" + fileCount + ", meanRows=" + meanRows
+				+ ", sdRows=" + sdRows + ", cols=" + cols + ", meanPhotos="
+				+ meanPhotos + ", sdPhotos=" + sdPhotos + ", targetDir="
+				+ targetDir + ", photoDir=" + photoDir;
 	}
 }

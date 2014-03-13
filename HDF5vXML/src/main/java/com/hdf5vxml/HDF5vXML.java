@@ -4,12 +4,19 @@ import static java.lang.System.out;
 
 import java.text.NumberFormat;
 
+import com.androtopia.RandomGaussianGenerator;
+
 public class HDF5vXML {
+
+	private final static String RESULTS_FILE_NAME = "HDF5vXML.csv";
 
 	private final IFileGenerator xmlFileGenerator;
 	private final IFileReader xmlFileReader;
 	private final IFileGenerator hdf5FileGenerator;
 	private final IFileReader hdf5FileReader;
+
+	private RandomGaussianGenerator rowsRandGenerator;
+	private RandomGaussianGenerator photosRandGenerator;
 
 	// globals
 	public final static RunConfig CONFIG = RunConfig.INSTANCE;
@@ -24,6 +31,8 @@ public class HDF5vXML {
 
 	public static void main(String[] args) {
 		HDF5vXML self = new HDF5vXML();
+		out.println("HDF5vXML version 1.0");
+		
 		if (args.length == 1) {
 			// use properties to configure the run
 			if (!CONFIG.init(args[0]))
@@ -33,13 +42,22 @@ public class HDF5vXML {
 			out.println("Must provide properties file name on the command line. Quiting.");
 			System.exit(-1);
 		}
+		
+		self.rowsRandGenerator = new RandomGaussianGenerator(
+				CONFIG.getMeanRows(), CONFIG.getSdRows());
+		self.photosRandGenerator = new RandomGaussianGenerator(
+				CONFIG.getMeanPhotos(), CONFIG.getSdPhotos());
+
 		try {
 			// generate XML and HDF5 files
+			out.print("Processing " + CONFIG.getFileCount() + " files.\nRunning ");
 			self.processFiles();
 
 			// generate statistics file
-			DATA.toCsvFile(CONFIG.getTargetDir() + "HDF5vXML.csv");
-			
+			DATA.toCsvFile(CONFIG.getTargetDir() + RESULTS_FILE_NAME);
+			System.out.println("\nResults can be found in: "
+					+ CONFIG.getTargetDir() + RESULTS_FILE_NAME);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -49,18 +67,62 @@ public class HDF5vXML {
 	private void processFiles() throws Exception {
 
 		FileDescriptor fd = new FileDescriptor();
-		fd.setCols(CONFIG.getCols());
 
 		NumberFormat nfFileNum = NumberFormat.getIntegerInstance();
 		nfFileNum.setGroupingUsed(false);
 		nfFileNum.setMinimumIntegerDigits(6);
 
 		for (int i = 1; i <= CONFIG.getFileCount(); i++) {
+
 			fd.setFileName("File" + nfFileNum.format(i));
+			fd.setRows(getVariableNumberOfRows());
+			fd.setCols(CONFIG.getCols());
+			fd.setNumberOfPhotos(getVariableNumberOfPhotos());
+			
+			// display progress every 50 files
+			if(i % 50 == 1)
+				out.print(".");
+
 			xmlFileGenerator.generate(fd);
 			xmlFileReader.read(fd);
 			hdf5FileGenerator.generate(fd);
 			hdf5FileReader.read(fd);
 		}
+	}
+
+	/**
+	 * Return a single randomly generated number of rows.
+	 * 
+	 * @return the number of samples.
+	 */
+	private long getVariableNumberOfRows() {
+		// rows suppressed?
+		if (CONFIG.getMeanRows() == 0)
+			return 1L;
+
+		Double x = rowsRandGenerator.getNextScaledGaussian();
+		// insure that there is at least one
+		if (x < 1)
+			return 1L;
+		else
+			return Math.round(x);
+	}
+
+	/**
+	 * Return a single randomly generated number of photos.
+	 * 
+	 * @return the number of photos.
+	 */
+	private long getVariableNumberOfPhotos() {
+		// photos suppressed?
+		if (CONFIG.getMeanPhotos() == 0)
+			return 0;
+
+		Double x = photosRandGenerator.getNextScaledGaussian();
+		// insure that there is at least one
+		if (x < 1)
+			return 1L;
+		else
+			return Math.round(x);
 	}
 }

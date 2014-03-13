@@ -1,12 +1,10 @@
 package com.hdf5vxml;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Test;
-
-import com.hdf5vxml.StatsData;
 
 public class StatsDataTest {
 	
