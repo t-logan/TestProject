@@ -14,6 +14,8 @@ public class HDF5vXML {
 	private final IFileReader xmlFileReader;
 	private final IFileGenerator hdf5FileGenerator;
 	private final IFileReader hdf5FileReader;
+	
+	private final FileSizeReader fileSizeReader = new FileSizeReader();
 
 	private RandomGaussianGenerator rowsRandGenerator;
 	private RandomGaussianGenerator photosRandGenerator;
@@ -52,6 +54,9 @@ public class HDF5vXML {
 			// generate XML and HDF5 files
 			out.print("Processing " + CONFIG.getFileCount() + " files.\nRunning ");
 			self.processFiles();
+			
+			// update file size information
+			self.fileSizeReader.updateFileSizes();
 
 			// generate statistics file
 			DATA.toCsvFile(CONFIG.getTargetDir() + RESULTS_FILE_NAME);

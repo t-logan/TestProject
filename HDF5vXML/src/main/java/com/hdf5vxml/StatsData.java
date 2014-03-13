@@ -56,11 +56,11 @@ public class StatsData {
 		getInfo(key).emissionsSamples = emissionsSamples;
 	}
 
-	public int getSizeOnDiskInBytes(String key) {
+	public long getSizeOnDiskInBytes(String key) {
 		return getInfo(key).sizeOnDiskInBytes;
 	}
 
-	public void setSizeOnDiskInBytes(String key, int sizeOnDiskInBytes) {
+	public void setSizeOnDiskInBytes(String key, long sizeOnDiskInBytes) {
 		getInfo(key).sizeOnDiskInBytes = sizeOnDiskInBytes;
 	}
 
@@ -145,7 +145,7 @@ public class StatsData {
 		private String fileExt;
 		private int numberOfPhotos;
 		private int emissionsSamples;
-		private int sizeOnDiskInBytes;
+		private long sizeOnDiskInBytes;
 		private int binaryBytes;
 		private long timeToCreateInMilliseconds;
 		private long timeToReadInMilliseconds;
