@@ -198,8 +198,8 @@ public class Hdf5FileReader implements IFileReader {
 
 		space = H5.H5Dget_space(dset);
 		int ndims = H5.H5Sget_simple_extent_dims(space, DIMS, null);
-		// TODO: setting limit?
-		int[] data = new int[500000];
+		// TODO: setting limit? 4MB for now.
+		int[] data = new int[4000000];
 		status = H5.H5Dread(dset, dtype, HDF5Constants.H5S_ALL,
 				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
 

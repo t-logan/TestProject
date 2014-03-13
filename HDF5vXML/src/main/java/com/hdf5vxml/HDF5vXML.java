@@ -16,6 +16,7 @@ public class HDF5vXML {
 	private final IFileReader hdf5FileReader;
 	
 	private final FileSizeReader fileSizeReader = new FileSizeReader();
+	private final static WorkspaceCleaner workspaceCleaner = new WorkspaceCleaner();
 
 	private RandomGaussianGenerator rowsRandGenerator;
 	private RandomGaussianGenerator photosRandGenerator;
@@ -51,8 +52,12 @@ public class HDF5vXML {
 				CONFIG.getMeanPhotos(), CONFIG.getSdPhotos());
 
 		try {
+			// clean the workspace
+			out.println("Cleaning ... ");
+			workspaceCleaner.cleanWorkingDir();
+			
 			// generate XML and HDF5 files
-			out.print("Processing " + CONFIG.getFileCount() + " files.\nRunning ");
+			out.print("File count is " + CONFIG.getFileCount() + ".\nProcessing ");
 			self.processFiles();
 			
 			// update file size information
