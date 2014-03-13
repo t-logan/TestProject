@@ -15,11 +15,14 @@ import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.ScalarDS;
+import ncsa.hdf.view.HDFView;
 
 public class Hdf5FileGenerator implements IFileGenerator {
 
 	private final static String ARRAY_EXT = ".hdf5a";
 	private final static String BINARY_EXT = ".hdf5b";
+	
+	private int totalBinaryData = 0;
 
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
@@ -73,10 +76,13 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		// import three images into array format
 		ff.createGroup("ImageGroup", null);
 		Group pGroup = (Group) ff.get("ImageGroup");
+		totalBinaryData = 0;
 		for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-			importImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
+			totalBinaryData += importImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
 					+ ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		}
+		HDF5vXML.DATA.setBinaryBytes(fileDescriptor.getFileName() + ARRAY_EXT, totalBinaryData);
+		
 		ff.close();
 	}
 
@@ -112,6 +118,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			importOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
 					+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 		}
+		// the same set of images is processed for both array and binary files
+		HDF5vXML.DATA.setBinaryBytes(fileDescriptor.getFileName() + BINARY_EXT, totalBinaryData);
+		
 		ff.close();
 	}
 
@@ -191,7 +200,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 	 * @param hdfFileType
 	 *            the type of file converted to.
 	 */
-	private void importImageDataset(String imgFileName, FileFormat hdfFile,
+	private int importImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 		File imgFile = null;
 
@@ -275,6 +284,8 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		data = null;
 		image = null;
 		Runtime.getRuntime().gc();
+		
+		return h * w;
 	}
 
 	/**
