@@ -1,0 +1,1 @@
+java -jar -Djava.library.path=C:\Users\tlogan\hdf5\hdf-java\lib\win HDF5vXML.jar C:/Users/tlogan/Documents/GitHub/TestProject/HDF5vXML/src/main/java/hdf5vxml.properties
