@@ -3,6 +3,7 @@ package com.hdf5vxml;
 import static java.lang.System.out;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +16,6 @@ import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
 import ncsa.hdf.object.Group;
 import ncsa.hdf.object.ScalarDS;
-import ncsa.hdf.view.HDFView;
 
 public class Hdf5FileGenerator implements IFileGenerator {
 
@@ -317,7 +317,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			FileFormat hdfFile, Group pGroup, String hdfFileType)
 			throws Exception {
 
-		int space, dtype, dset;
+		int space, dtype, dset, byteCount = 0;
 		int status;
 
 		// read image file
@@ -325,6 +325,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		try {
 			BufferedInputStream in = new BufferedInputStream(
 					new FileInputStream(imgFileName));
+			byteCount = in.available();
 			image = ImageIO.read(in);
 			in.close();
 		} catch (Throwable err) {
@@ -337,7 +338,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 
 		int h = image.getHeight();
 		int w = image.getWidth();
-		long[] dims = { h * w };
+		long[] dims = { byteCount };
 		int[] data = new int[h * w];
 
 		// copy the image data
