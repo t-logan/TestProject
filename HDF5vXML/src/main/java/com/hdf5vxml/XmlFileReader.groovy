@@ -1,5 +1,7 @@
 package com.hdf5vxml;
 
+import org.apache.commons.codec.binary.Base64
+
 public class XmlFileReader implements IFileReader {
 
 	@Override
@@ -18,8 +20,18 @@ public class XmlFileReader implements IFileReader {
 
 		// parse the file
 		def file = new File(inputFile)
-		def emissions = new XmlParser().parse(file)
+		def parsedData = new XmlParser().parse(file)
 
+		// parse the 2D array values
+		parsedData.arrayGroup.array.val.each{value ->
+			Double.parseDouble(value.text())
+		}
+
+		// decode the image data
+		parsedData.imageGroup.photo.each{ photo ->
+			Base64.decodeBase64(photo.text())
+		}
+		
 		// compute times
 		xmlReadTime = System.currentTimeMillis() - xmlReadStartTime
 		HDF5vXML.DATA.setTimeToReadInMilliseconds(fileDescriptor.getFileName() + ".xml", xmlReadTime)
