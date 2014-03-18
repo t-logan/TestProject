@@ -15,7 +15,7 @@ public class PhotoDispenserTest {
 	public void getCount() throws IOException {
 		RunConfig.INSTANCE.init(System.getProperty("prop.file"));
 		PhotoDispenser.INSTANCE.init();
-		assertTrue(PhotoDispenser.INSTANCE.getCount() == Integer.parseInt(System.getProperty("file.count")));
+		assertTrue(PhotoDispenser.INSTANCE.getCountOfPhotos() == Integer.parseInt(System.getProperty("file.count")));
 	}
 	
 	@Test

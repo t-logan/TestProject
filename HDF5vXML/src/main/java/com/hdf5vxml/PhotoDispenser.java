@@ -18,6 +18,7 @@ public class PhotoDispenser extends DirectoryWalker {
 	public static final PhotoDispenser INSTANCE = new PhotoDispenser();
 	private static final List<String> photos = new ArrayList<String>();
 	private int pointer = 0;
+	private int sequence = 0;
 
 	private PhotoDispenser() {
 	}
@@ -50,6 +51,7 @@ public class PhotoDispenser extends DirectoryWalker {
 	 */
 	public synchronized void top() {
 		pointer = 0;
+		sequence = 0;
 	}
 
 	/**
@@ -63,10 +65,15 @@ public class PhotoDispenser extends DirectoryWalker {
 		if (pointer == photos.size())
 			pointer = 0;
 		
+		sequence++;
 		return photos.get(pointer++);
 	}
 	
-	public int getCount() {
+	public int getSequence() {
+		return sequence;
+	}
+	
+	public int getCountOfPhotos() {
 		return photos.size();
 	}
 }

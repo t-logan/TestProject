@@ -287,7 +287,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		if (hdfFile != null) {
 			type = hdfFile.createDatatype(Datatype.CLASS_CHAR, 1,
 					Datatype.NATIVE, Datatype.SIGN_NONE);
-			hdfFile.createImage(imgName, pGroup, type, dims, null, null, -1, 3,
+			hdfFile.createImage(imgName + "." + HDF5vXML.PHOTOS.getSequence(), pGroup, type, dims, null, null, -1, 3,
 					ScalarDS.INTERLACE_PIXEL, data);
 		}
 
@@ -357,7 +357,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 
 		space = H5.H5Screate_simple(1, dims, null);
 		dset = H5.H5Dcreate(hdfFile.getFID(),
-				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')),
+				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')) + "." + HDF5vXML.PHOTOS.getSequence(),
 				dtype, space, HDF5Constants.H5P_DEFAULT);
 		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL,
 				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
