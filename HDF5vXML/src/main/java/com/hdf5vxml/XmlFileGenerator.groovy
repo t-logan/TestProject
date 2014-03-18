@@ -4,9 +4,6 @@ import org.apache.commons.codec.binary.Base64
 
 public class XmlFileGenerator implements IFileGenerator{
 
-	private final static String XML_EXT = ".xml";
-	private final static String XMLC_EXT = ".xmlc";
-
 	private groovy.xml.StreamingMarkupBuilder builder
 
 	private String encodedPic
@@ -26,6 +23,9 @@ public class XmlFileGenerator implements IFileGenerator{
 
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
+		fileDescriptor.setFileExt(FileDescriptor.XML_EXT);
+		emitXml(fileDescriptor, builder)
+		fileDescriptor.setFileExt(FileDescriptor.XMLC_EXT);
 		emitXml(fileDescriptor, builder)
 	}
 
@@ -37,15 +37,15 @@ public class XmlFileGenerator implements IFileGenerator{
 	 */
 	private void emitXml(FileDescriptor fd, groovy.xml.StreamingMarkupBuilder builder) {
 
-		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + XML_EXT);
-		HDF5vXML.DATA.setFileExt(fd.getFileName() + XML_EXT, XML_EXT.substring(1));
-		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + XML_EXT, fd.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + XML_EXT, fd.getRows());
+		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + fd.getFileExt());
+		HDF5vXML.DATA.setFileExt(fd.getFileName() + fd.getFileExt(), fd.getFileExt().substring(1));
+		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + fd.getFileExt(), fd.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + fd.getFileExt(), fd.getRows());
 
 		xmlWriteStartTime = System.currentTimeMillis();
 
 		// output XML file
-		FileWriter xmlFile = new FileWriter(new File(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml"))
+		FileWriter xmlFile = new FileWriter(new File(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + FileDescriptor.XML_EXT))
 
 		genXmlHeader(xmlFile, builder);
 
@@ -75,27 +75,23 @@ public class XmlFileGenerator implements IFileGenerator{
 		// write the final tag and close the file
 		xmlFile.write("</testFile>");
 		xmlFile.close()
-		
-		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + XML_EXT, totalImageBytes);
+
+		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + fd.getFileExt(), totalImageBytes);
 
 		// compute times
 		xmlWriteTime = System.currentTimeMillis() - xmlWriteStartTime;
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + XML_EXT, xmlWriteTime);
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + fd.getFileExt(), xmlWriteTime);
 
-		// time the zip process ...
-		cxmlWriteStartTime = System.currentTimeMillis();
+		// time the zip process and add it to write time ...
+		if(fd.getFileExt().equals(FileDescriptor.XMLC_EXT)) {
+			cxmlWriteStartTime = System.currentTimeMillis();
 
-		zipper.zip(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml",
-				HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xmlc");
+			zipper.zip(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml",
+					HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xmlc");
 
-		cxmlWriteTime = (System.currentTimeMillis() - cxmlWriteStartTime) + xmlWriteTime;
-
-		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + XMLC_EXT);
-		HDF5vXML.DATA.setFileExt(fd.getFileName() + XMLC_EXT, XMLC_EXT.substring(1));
-		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + XMLC_EXT, fd.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + XMLC_EXT, fd.getRows());
-		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + XMLC_EXT, totalImageBytes);
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + XMLC_EXT, cxmlWriteTime);
+			cxmlWriteTime = (System.currentTimeMillis() - cxmlWriteStartTime) + xmlWriteTime;
+			HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + fd.getFileExt(), cxmlWriteTime);
+		}
 	}
 
 	/**
