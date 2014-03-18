@@ -75,15 +75,15 @@ public class Hdf5FileGenerator implements IFileGenerator {
 					"2DArray", ff, aGroup);
 		}
 
-		// import three images into array format
+		// import the images in array format
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			ff.createGroup("ImageGroup", null);
 			Group pGroup = (Group) ff.get("ImageGroup");
 			totalBinaryData = 0;
+			HDF5vXML.PHOTOS.top();
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
 				totalBinaryData += importImageDataset(
-						HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo" + i
-								+ ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+						HDF5vXML.PHOTOS.next(), ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 			}
 			HDF5vXML.DATA.setBinaryBytes(fileDescriptor.getFileName()
 					+ ARRAY_EXT, totalBinaryData);
@@ -122,9 +122,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			ff.createGroup("ImageGroup", null);
 			Group pGroup = (Group) ff.get("ImageGroup");
+			HDF5vXML.PHOTOS.top();
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				importOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/"
-						+ "photo" + i + ".jpg", ff, pGroup,
+				importOpaqueImageDataset(HDF5vXML.PHOTOS.next(), ff, pGroup,
 						FileFormat.FILE_TYPE_HDF5);
 			}
 			// the same set of images is processed for both array and binary

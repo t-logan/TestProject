@@ -41,7 +41,7 @@ public class PhotoDispenser extends DirectoryWalker {
 		if (file.getName().endsWith(".jpg") || file.getName().endsWith(".JPG")
 				|| file.getName().endsWith(".jpeg")
 				|| file.getName().endsWith(".JPEG")) {
-			photos.add(file.getAbsoluteFile().getCanonicalPath());
+			photos.add(file.getAbsoluteFile().getCanonicalPath().replaceAll("\\\\", "/"));
 		}
 	}
 

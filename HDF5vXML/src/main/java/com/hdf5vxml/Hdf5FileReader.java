@@ -51,11 +51,11 @@ public class Hdf5FileReader implements IFileReader {
 		}
 
 		// read image array data
+		HDF5vXML.PHOTOS.top();
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			Group pGroup = (Group) ff.get("ImageGroup");
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				readImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/" + "photo"
-						+ i + ".jpg", ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+				readImageDataset(HDF5vXML.PHOTOS.next(), ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 			}
 		}
 		ff.close();
@@ -82,11 +82,11 @@ public class Hdf5FileReader implements IFileReader {
 		}
 
 		// read three images in opaque format
+		HDF5vXML.PHOTOS.top();
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			Group pGroup = (Group) ff.get("ImageGroup");
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				readOpaqueImageDataset(HDF5vXML.CONFIG.getPhotoDir() + "/"
-						+ "photo" + i + ".jpg", ff, pGroup,
+				readOpaqueImageDataset(HDF5vXML.PHOTOS.next(), ff, pGroup,
 						FileFormat.FILE_TYPE_HDF5);
 			}
 		}
