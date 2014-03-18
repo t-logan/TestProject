@@ -36,6 +36,8 @@ public class XmlFileGenerator implements IFileGenerator{
 	 * @param builder the MarkupBuilder used to output XML with Groovy.
 	 */
 	private void emitXml(FileDescriptor fd, groovy.xml.StreamingMarkupBuilder builder) {
+		
+		String photoFile
 
 		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + fd.getFileExt());
 		HDF5vXML.DATA.setFileExt(fd.getFileName() + fd.getFileExt(), fd.getFileExt().substring(1));
@@ -61,10 +63,14 @@ public class XmlFileGenerator implements IFileGenerator{
 					}
 				}
 			}
+			HDF5vXML.PHOTOS.top();
 			imageGroup {
 				for(int i =0; i < fd.getNumberOfPhotos(); i++) {
-					unescaped << "<photo><![CDATA[" + encodeImage(
-							new FileInputStream(HDF5vXML.CONFIG.getPhotoDir() + "photo" + i + ".jpg")) + "]]></photo>"
+					photoFile = HDF5vXML.PHOTOS.next()
+					photo(id:photoFile) {
+					unescaped << "<![CDATA[" + encodeImage(
+							new FileInputStream(photoFile)) + "]]>"
+					}
 				}
 			}
 		}
@@ -86,8 +92,8 @@ public class XmlFileGenerator implements IFileGenerator{
 		if(fd.getFileExt().equals(FileDescriptor.XMLC_EXT)) {
 			cxmlWriteStartTime = System.currentTimeMillis();
 
-			zipper.zip(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xml",
-					HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + ".xmlc");
+			zipper.zip(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + FileDescriptor.XML_EXT,
+					HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + FileDescriptor.XMLC_EXT);
 
 			cxmlWriteTime = (System.currentTimeMillis() - cxmlWriteStartTime) + xmlWriteTime;
 			HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + fd.getFileExt(), cxmlWriteTime);

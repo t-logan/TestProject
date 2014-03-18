@@ -26,7 +26,7 @@ public class PhotoDispenser extends DirectoryWalker {
 
 		if (photos.size() > 0)
 			return;
-
+		
 		File startDirectory = new File(HDF5vXML.CONFIG.getPhotoDir());
 		walk(startDirectory, photos);
 		Collections.sort(photos);
