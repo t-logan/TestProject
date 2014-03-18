@@ -44,7 +44,7 @@ public class XmlFileGenerator implements IFileGenerator{
 
 		xmlWriteStartTime = System.currentTimeMillis();
 
-		// output XML file
+		// output XML file - overwrite it when processing .xmlc files
 		FileWriter xmlFile = new FileWriter(new File(HDF5vXML.CONFIG.getTargetDir() + fd.getFileName() + FileDescriptor.XML_EXT))
 
 		genXmlHeader(xmlFile, builder);

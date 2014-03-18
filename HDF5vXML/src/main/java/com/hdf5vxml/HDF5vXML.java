@@ -2,6 +2,7 @@ package com.hdf5vxml;
 
 import static java.lang.System.out;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 
 import com.hdf5vxml.RandomGaussianGenerator;
@@ -24,6 +25,7 @@ public class HDF5vXML {
 	// globals
 	public final static RunConfig CONFIG = RunConfig.INSTANCE;
 	public final static StatsData DATA = StatsData.INSTANCE;
+	public static PhotoDispenser PHOTOS = PhotoDispenser.INSTANCE;
 
 	public HDF5vXML() {
 		xmlFileGenerator = new XmlFileGenerator();
@@ -46,6 +48,13 @@ public class HDF5vXML {
 			System.exit(-1);
 		}
 		
+		try {
+			PHOTOS.init();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		 
 		self.rowsRandGenerator = new RandomGaussianGenerator(
 				CONFIG.getMeanRows(), CONFIG.getSdRows());
 		self.photosRandGenerator = new RandomGaussianGenerator(
