@@ -53,6 +53,8 @@ public class RunConfig {
 			}
 
 			fileCount = Integer.parseInt(props.getProperty(FILE_COUNT).trim());
+			// the information about the first file gets excluded to ignore VM warmup
+			++fileCount;
 			meanRows = Integer.parseInt(props.getProperty(ARRAY_ROW_MEAN)
 					.trim());
 			sdRows = Integer.parseInt(props.getProperty(ARRAY_ROW_SD).trim());

@@ -66,7 +66,7 @@ public class HDF5vXML {
 			workspaceCleaner.cleanWorkingDir();
 			
 			// generate XML and HDF5 files
-			out.print("File count is " + CONFIG.getFileCount() + ".\nProcessing ");
+			out.print("File count is " + (CONFIG.getFileCount() - 1) + ".\nProcessing ");
 			self.processFiles();
 			
 			// update file size information
@@ -91,7 +91,7 @@ public class HDF5vXML {
 		nfFileNum.setGroupingUsed(false);
 		nfFileNum.setMinimumIntegerDigits(6);
 
-		for (int i = 1; i <= CONFIG.getFileCount(); i++) {
+		for (int i = 0; i < CONFIG.getFileCount(); i++) {
 
 			fd.setFileName("File" + nfFileNum.format(i));
 			fd.setRows(getVariableNumberOfRows());

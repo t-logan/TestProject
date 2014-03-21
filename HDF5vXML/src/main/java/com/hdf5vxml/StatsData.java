@@ -110,6 +110,10 @@ public class StatsData {
 		bw.write(header);
 
 		for (String key : stats.keySet()) {
+			// ignore the results for the first file
+			if(key.contains("File000000.")) {
+				continue;
+			}
 			StatsInfo statsInfo = stats.get(key);
 			bw.write(key + "," + statsInfo.fileExt + ","
 					+ statsInfo.numberOfPhotos + ","
