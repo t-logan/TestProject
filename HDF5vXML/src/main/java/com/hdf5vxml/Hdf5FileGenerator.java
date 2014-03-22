@@ -219,6 +219,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 	private int importImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 		File imgFile = null;
+		int imgFileBytes = 0;
 
 		if (imgFileName == null) {
 			throw new NullPointerException("Source image file is null.");
@@ -239,6 +240,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		try {
 			BufferedInputStream in = new BufferedInputStream(
 					new FileInputStream(imgFileName));
+			imgFileBytes = in.available();
 			image = ImageIO.read(in);
 			in.close();
 		} catch (Throwable err) {
@@ -301,7 +303,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		image = null;
 		Runtime.getRuntime().gc();
 
-		return h * w;
+		return imgFileBytes;
 	}
 
 	/**

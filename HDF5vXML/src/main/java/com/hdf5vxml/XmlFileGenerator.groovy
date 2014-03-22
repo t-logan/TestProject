@@ -38,6 +38,7 @@ public class XmlFileGenerator implements IFileGenerator{
 	private void emitXml(FileDescriptor fd, groovy.xml.StreamingMarkupBuilder builder) {
 		
 		String photoFile
+		totalImageBytes = 0
 
 		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + fd.getFileExt());
 		HDF5vXML.DATA.setFileExt(fd.getFileName() + fd.getFileExt(), fd.getFileExt().substring(1));
