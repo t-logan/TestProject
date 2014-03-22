@@ -55,9 +55,13 @@ public class Hdf5FileReader implements IFileReader {
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			Group pGroup = (Group) ff.get("ImageGroup");
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				readImageDataset(HDF5vXML.PHOTOS.next() + "." + HDF5vXML.PHOTOS.getSequence(), ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+				readImageDataset(
+						HDF5vXML.PHOTOS.next() + "."
+								+ HDF5vXML.PHOTOS.getSequence(), ff, pGroup,
+						FileFormat.FILE_TYPE_HDF5);
 			}
 		}
+
 		ff.close();
 	}
 
@@ -86,10 +90,12 @@ public class Hdf5FileReader implements IFileReader {
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			Group pGroup = (Group) ff.get("ImageGroup");
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				readOpaqueImageDataset(HDF5vXML.PHOTOS.next() + "." + HDF5vXML.PHOTOS.getSequence(), ff, pGroup,
+				readOpaqueImageDataset(HDF5vXML.PHOTOS.next() + "."
+						+ HDF5vXML.PHOTOS.getSequence(), ff, pGroup,
 						FileFormat.FILE_TYPE_HDF5);
 			}
 		}
+
 		ff.close();
 	}
 
@@ -109,6 +115,11 @@ public class Hdf5FileReader implements IFileReader {
 			FileFormat hdfFile, Group pGroup) throws Exception {
 		int fid = -1, did = -1, rid = -1;
 		int[][] readValues = new int[rows][cols];
+		
+		// nothing to read if rows=0
+		if(rows == 0) {
+			return;
+		}
 
 		try {
 			// Open the existing file using default properties.
@@ -119,9 +130,16 @@ public class Hdf5FileReader implements IFileReader {
 			did = H5.H5Dopen(fid, pGroup + "/" + dsName);
 
 			// Read the array using default transfer properties.
-			rid = H5.H5Dread(did, HDF5Constants.H5T_NATIVE_INT,
-					HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-					HDF5Constants.H5P_DEFAULT, readValues);
+			try {
+				rid = H5.H5Dread(did, HDF5Constants.H5T_NATIVE_INT,
+						HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+						HDF5Constants.H5P_DEFAULT, readValues);
+			} catch (Exception e) {
+				System.out.println("row=" + rows + ", col=" + cols + ": "
+						+ e.getMessage());
+				throw e;
+			}
+
 			if (rid < 0)
 				out.println("Read FAILED on " + dsName + " array, rid=" + rid);
 

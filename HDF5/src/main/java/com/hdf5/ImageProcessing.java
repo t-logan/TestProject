@@ -104,7 +104,7 @@ public class ImageProcessing {
 			if (sid >= 0)
 				H5.H5Sclose(sid);
 		} catch (Throwable t) {
-			out.println("> Error writing array: " + t.getMessage());
+			out.println("> Error writing array during ImageProcessing: " + t.getMessage());
 			return;
 		}
 	}

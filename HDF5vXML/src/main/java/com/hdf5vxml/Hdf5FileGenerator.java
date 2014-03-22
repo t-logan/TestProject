@@ -154,6 +154,11 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		int rank = 2;
 		long[] dimensions = { rows, cols };
 		double[][] values = new double[rows][cols];
+		
+		// nothing to write if rows=0
+		if(rows == 0) {
+			return;
+		}
 
 		// populate the array
 		double value = 1.0;
@@ -192,7 +197,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			if (sid >= 0)
 				H5.H5Sclose(sid);
 		} catch (Throwable t) {
-			out.println("> Error writing array: " + t.getMessage());
+			out.println("> Error writing array in Hdf5FileGenerator: " + t.getMessage());
 			return;
 		}
 	}
