@@ -9,6 +9,7 @@ import com.hdf5vxml.RandomGaussianGenerator;
 
 public class HDF5vXML {
 
+	private final static String VERSION = "1.0";
 	private final static String RESULTS_FILE_NAME = "HDF5vXML.csv";
 
 	private final IFileGenerator xmlFileGenerator;
@@ -36,7 +37,7 @@ public class HDF5vXML {
 
 	public static void main(String[] args) {
 		HDF5vXML self = new HDF5vXML();
-		out.println("HDF5vXML version 1.0");
+		out.println("HDF5vXML version " + VERSION);
 		
 		if (args.length == 1) {
 			// use properties to configure the run

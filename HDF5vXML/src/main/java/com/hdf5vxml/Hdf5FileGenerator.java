@@ -3,7 +3,6 @@ package com.hdf5vxml;
 import static java.lang.System.out;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,37 +19,56 @@ import ncsa.hdf.object.ScalarDS;
 public class Hdf5FileGenerator implements IFileGenerator {
 
 	private final static String ARRAY_EXT = ".hdf5a";
-	private final static String BINARY_EXT = ".hdf5b";
+	private final static String OPAQUE_EXT = ".hdf5b";
 
 	private int totalBinaryData = 0;
 
+	/**
+	 * Generate opaque and array image HDF5 files, based on the information
+	 * passed in the fileDescriptor.
+	 * 
+	 * @param fileDescriptor
+	 *            information about the file being processed.
+	 * @throws Exception
+	 *             when an HDF5 error occurs.
+	 */
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
 
-		// write array image file
+		// write opaque image file
 		long startTime = System.currentTimeMillis();
-		writeArrayFile(fileDescriptor);
+		writeOpaqueBinaryFile(fileDescriptor);
 		long elapsedTime = System.currentTimeMillis() - startTime;
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
+				fileDescriptor.getFileName() + OPAQUE_EXT, elapsedTime);
+		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
+				+ OPAQUE_EXT, fileDescriptor.getNumberOfPhotos());
+		HDF5vXML.DATA.setEmissionsSamples(fileDescriptor.getFileName()
+				+ OPAQUE_EXT, fileDescriptor.getRows());
+
+		// write array image file
+		startTime = System.currentTimeMillis();
+		writeArrayImageFile(fileDescriptor);
+		elapsedTime = System.currentTimeMillis() - startTime;
 		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
 				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
 		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getNumberOfPhotos());
 		HDF5vXML.DATA.setEmissionsSamples(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getRows());
-
-		// write opaque image file
-		startTime = System.currentTimeMillis();
-		writeBinaryFile(fileDescriptor);
-		elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
-				fileDescriptor.getFileName() + BINARY_EXT, elapsedTime);
-		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
-				+ BINARY_EXT, fileDescriptor.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fileDescriptor.getFileName()
-				+ BINARY_EXT, fileDescriptor.getRows());
 	}
 
-	private void writeArrayFile(FileDescriptor fileDescriptor) throws Exception {
+	/**
+	 * Create HDF5 files containing a 2D array 3D array image data that can be
+	 * displayed in the HDFView and other tools.
+	 * 
+	 * @param fileDescriptor
+	 *            information about the file being processed.
+	 * @throws Exception
+	 *             when an HDF5 error occurs.
+	 */
+	private void writeArrayImageFile(FileDescriptor fileDescriptor)
+			throws Exception {
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
 				+ fileDescriptor.getFileName() + ARRAY_EXT;
@@ -82,8 +100,8 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			totalBinaryData = 0;
 			HDF5vXML.PHOTOS.top();
 			for (int i = 0; i < fileDescriptor.getNumberOfPhotos(); i++) {
-				totalBinaryData += importImageDataset(
-						HDF5vXML.PHOTOS.next(), ff, pGroup, FileFormat.FILE_TYPE_HDF5);
+				totalBinaryData += importImageDataset(HDF5vXML.PHOTOS.next(),
+						ff, pGroup, FileFormat.FILE_TYPE_HDF5);
 			}
 			HDF5vXML.DATA.setBinaryBytes(fileDescriptor.getFileName()
 					+ ARRAY_EXT, totalBinaryData);
@@ -91,11 +109,19 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		ff.close();
 	}
 
-	private void writeBinaryFile(FileDescriptor fileDescriptor)
+	/**
+	 * Create HDF5 files containing a 2D array opaque image data.
+	 * 
+	 * @param fileDescriptor
+	 *            information about the file being processed.
+	 * @throws Exception
+	 *             when an HDF5 error occurs.
+	 */
+	private void writeOpaqueBinaryFile(FileDescriptor fileDescriptor)
 			throws Exception {
 
 		String fileName = HDF5vXML.CONFIG.getTargetDir()
-				+ fileDescriptor.getFileName() + BINARY_EXT;
+				+ fileDescriptor.getFileName() + OPAQUE_EXT;
 
 		// create an HDF5 dataset
 		int fid = H5.H5Fcreate(fileName, HDF5Constants.H5F_ACC_TRUNC,
@@ -106,9 +132,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 
 		// insert data entry for this file
 		HDF5vXML.DATA
-				.createStatsInfo(fileDescriptor.getFileName() + BINARY_EXT);
-		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + BINARY_EXT,
-				BINARY_EXT.substring(1));
+				.createStatsInfo(fileDescriptor.getFileName() + OPAQUE_EXT);
+		HDF5vXML.DATA.setFileExt(fileDescriptor.getFileName() + OPAQUE_EXT,
+				OPAQUE_EXT.substring(1));
 
 		// 2D array
 		if (HDF5vXML.CONFIG.getMeanRows() > 0) {
@@ -130,7 +156,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			// the same set of images is processed for both array and binary
 			// files
 			HDF5vXML.DATA.setBinaryBytes(fileDescriptor.getFileName()
-					+ BINARY_EXT, totalBinaryData);
+					+ OPAQUE_EXT, totalBinaryData);
 		}
 		ff.close();
 	}
@@ -154,9 +180,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		int rank = 2;
 		long[] dimensions = { rows, cols };
 		double[][] values = new double[rows][cols];
-		
+
 		// nothing to write if rows=0
-		if(rows == 0) {
+		if (rows == 0) {
 			return;
 		}
 
@@ -197,7 +223,8 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			if (sid >= 0)
 				H5.H5Sclose(sid);
 		} catch (Throwable t) {
-			out.println("> Error writing array in Hdf5FileGenerator: " + t.getMessage());
+			out.println("> Error writing array in Hdf5FileGenerator: "
+					+ t.getMessage());
 			return;
 		}
 	}
@@ -294,14 +321,15 @@ public class Hdf5FileGenerator implements IFileGenerator {
 		if (hdfFile != null) {
 			type = hdfFile.createDatatype(Datatype.CLASS_CHAR, 1,
 					Datatype.NATIVE, Datatype.SIGN_NONE);
-			hdfFile.createImage(imgName + "." + HDF5vXML.PHOTOS.getSequence(), pGroup, type, dims, null, null, -1, 3,
+			hdfFile.createImage(imgName + "." + HDF5vXML.PHOTOS.getSequence(),
+					pGroup, type, dims, null, null, -1, 3,
 					ScalarDS.INTERLACE_PIXEL, data);
 		}
 
 		// free memory
 		data = null;
 		image = null;
-		Runtime.getRuntime().gc();
+		// Runtime.getRuntime().gc();
 
 		return imgFileBytes;
 	}
@@ -364,8 +392,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 
 		space = H5.H5Screate_simple(1, dims, null);
 		dset = H5.H5Dcreate(hdfFile.getFID(),
-				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')) + "." + HDF5vXML.PHOTOS.getSequence(),
-				dtype, space, HDF5Constants.H5P_DEFAULT);
+				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/'))
+						+ "." + HDF5vXML.PHOTOS.getSequence(), dtype, space,
+				HDF5Constants.H5P_DEFAULT);
 		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL,
 				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
 
