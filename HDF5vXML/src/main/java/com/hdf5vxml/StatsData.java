@@ -48,12 +48,12 @@ public class StatsData {
 		getInfo(key).numberOfPhotos = numberOfPhotos;
 	}
 
-	public int getEmissionsSamples(String key) {
-		return getInfo(key).emissionsSamples;
+	public int getDataArrayRows(String key) {
+		return getInfo(key).dataArrayRows;
 	}
 
-	public void setEmissionsSamples(String key, int emissionsSamples) {
-		getInfo(key).emissionsSamples = emissionsSamples;
+	public void setDataArrayRows(String key, int dataArrayRows) {
+		getInfo(key).dataArrayRows = dataArrayRows;
 	}
 
 	public long getSizeOnDiskInBytes(String key) {
@@ -105,7 +105,7 @@ public class StatsData {
 		FileWriter fw = new FileWriter(file.getAbsoluteFile());
 		BufferedWriter bw = new BufferedWriter(fw);
 
-		String header = "fileName,fileExt,numberOfPhotos,emissionsSamples,sizeOnDiskInBytes,binaryBytes,"
+		String header = "fileName,fileExt,numberOfPhotos,dataArrayRows,sizeOnDiskInBytes,binaryBytes,"
 				+ "timeToCreateInMilliseconds,timeToReadInMilliseconds\n";
 		bw.write(header);
 
@@ -117,7 +117,7 @@ public class StatsData {
 			StatsInfo statsInfo = stats.get(key);
 			bw.write(key + "," + statsInfo.fileExt + ","
 					+ statsInfo.numberOfPhotos + ","
-					+ statsInfo.emissionsSamples + ","
+					+ statsInfo.dataArrayRows + ","
 					+ statsInfo.sizeOnDiskInBytes + "," + statsInfo.binaryBytes
 					+ "," + statsInfo.timeToCreateInMilliseconds + ","
 					+ statsInfo.timeToReadInMilliseconds + "\n");
@@ -132,7 +132,7 @@ public class StatsData {
 		}
 		return "key=" + key + "fileEx=" + statsInfo.fileExt
 				+ ",numberOfPhotos=" + statsInfo.numberOfPhotos
-				+ ",emissionsSamples=" + statsInfo.emissionsSamples
+				+ ",dataArrayRows=" + statsInfo.dataArrayRows
 				+ ",sizeOnDiskInBytes=" + statsInfo.sizeOnDiskInBytes
 				+ ",binaryBytes=" + statsInfo.binaryBytes
 				+ ",timeToCreateInMilliseconds="
@@ -148,7 +148,7 @@ public class StatsData {
 	private class StatsInfo {
 		private String fileExt;
 		private int numberOfPhotos;
-		private int emissionsSamples;
+		private int dataArrayRows;
 		private long sizeOnDiskInBytes;
 		private int binaryBytes;
 		private long timeToCreateInMilliseconds;

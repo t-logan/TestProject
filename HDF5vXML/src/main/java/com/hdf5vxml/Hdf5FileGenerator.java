@@ -43,7 +43,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 				fileDescriptor.getFileName() + OPAQUE_EXT, elapsedTime);
 		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
 				+ OPAQUE_EXT, fileDescriptor.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fileDescriptor.getFileName()
+		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
 				+ OPAQUE_EXT, fileDescriptor.getRows());
 
 		// write array image file
@@ -54,7 +54,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
 		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fileDescriptor.getFileName()
+		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getRows());
 	}
 

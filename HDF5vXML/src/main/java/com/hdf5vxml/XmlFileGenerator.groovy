@@ -43,7 +43,7 @@ public class XmlFileGenerator implements IFileGenerator{
 		HDF5vXML.DATA.createStatsInfo(fd.getFileName() + fd.getFileExt());
 		HDF5vXML.DATA.setFileExt(fd.getFileName() + fd.getFileExt(), fd.getFileExt().substring(1));
 		HDF5vXML.DATA.setNumberOfPhotos(fd.getFileName() + fd.getFileExt(), fd.getNumberOfPhotos());
-		HDF5vXML.DATA.setEmissionsSamples(fd.getFileName() + fd.getFileExt(), fd.getRows());
+		HDF5vXML.DATA.setDataArrayRows(fd.getFileName() + fd.getFileExt(), fd.getRows());
 
 		xmlWriteStartTime = System.currentTimeMillis();
 

@@ -14,7 +14,7 @@ public class StatsDataTest {
 		StatsData.INSTANCE.createStatsInfo(key);
 		StatsData.INSTANCE.setFileExt(key, "ext");
 		StatsData.INSTANCE.setNumberOfPhotos(key, 3);
-		StatsData.INSTANCE.setEmissionsSamples(key, 6);
+		StatsData.INSTANCE.setDataArrayRows(key, 6);
 		StatsData.INSTANCE.setSizeOnDiskInBytes(key, 50000);
 		StatsData.INSTANCE.setBinaryBytes(key, 1500);
 		StatsData.INSTANCE.setTimeToCreateInMilliseconds(key, 445566);
