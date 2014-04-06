@@ -83,10 +83,10 @@ public class XmlFileGenerator implements IFileGenerator{
 		xmlFile.write("</testFile>");
 		xmlFile.close()
 
-		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + fd.getFileExt(), totalImageBytes);
-
 		// compute times
 		xmlWriteTime = System.currentTimeMillis() - xmlWriteStartTime;
+
+		HDF5vXML.DATA.setBinaryBytes(fd.getFileName() + fd.getFileExt(), totalImageBytes);
 		HDF5vXML.DATA.setTimeToCreateInMilliseconds(fd.getFileName() + fd.getFileExt(), xmlWriteTime);
 
 		// time the zip process and add it to write time ...
