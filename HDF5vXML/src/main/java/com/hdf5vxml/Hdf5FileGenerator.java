@@ -35,27 +35,27 @@ public class Hdf5FileGenerator implements IFileGenerator {
 	@Override
 	public void generate(FileDescriptor fileDescriptor) throws Exception {
 
-		// write opaque image file
-		long startTime = System.currentTimeMillis();
-		writeOpaqueBinaryFile(fileDescriptor);
-		long elapsedTime = System.currentTimeMillis() - startTime;
-		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
-				fileDescriptor.getFileName() + OPAQUE_EXT, elapsedTime);
-		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
-				+ OPAQUE_EXT, fileDescriptor.getNumberOfPhotos());
-		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
-				+ OPAQUE_EXT, fileDescriptor.getRows());
-
 		// write array image file
-		startTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		writeArrayImageFile(fileDescriptor);
-		elapsedTime = System.currentTimeMillis() - startTime;
+		long elapsedTime = System.currentTimeMillis() - startTime;
 		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
 				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
 		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getNumberOfPhotos());
 		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getRows());
+
+		// write opaque image file
+		startTime = System.currentTimeMillis();
+		writeOpaqueBinaryFile(fileDescriptor);
+		elapsedTime = System.currentTimeMillis() - startTime;
+		HDF5vXML.DATA.setTimeToCreateInMilliseconds(
+				fileDescriptor.getFileName() + OPAQUE_EXT, elapsedTime);
+		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
+				+ OPAQUE_EXT, fileDescriptor.getNumberOfPhotos());
+		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
+				+ OPAQUE_EXT, fileDescriptor.getRows());
 	}
 
 	/**
