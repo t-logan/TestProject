@@ -45,7 +45,7 @@ public class StatsData {
 	}
 
 	public void setNumberOfPhotos(String key, int numberOfPhotos) {
-		getInfo(key).numberOfPhotos = numberOfPhotos;
+		getInfo(key).numberOfPhotos = notNegative(numberOfPhotos);
 	}
 
 	public int getDataArrayRows(String key) {
@@ -53,7 +53,7 @@ public class StatsData {
 	}
 
 	public void setDataArrayRows(String key, int dataArrayRows) {
-		getInfo(key).dataArrayRows = dataArrayRows;
+		getInfo(key).dataArrayRows = notNegative(dataArrayRows);
 	}
 
 	public long getSizeOnDiskInBytes(String key) {
@@ -61,7 +61,7 @@ public class StatsData {
 	}
 
 	public void setSizeOnDiskInBytes(String key, long sizeOnDiskInBytes) {
-		getInfo(key).sizeOnDiskInBytes = sizeOnDiskInBytes;
+		getInfo(key).sizeOnDiskInBytes = notNegative(sizeOnDiskInBytes);
 	}
 
 	public int getBinaryBytes(String key) {
@@ -69,7 +69,7 @@ public class StatsData {
 	}
 
 	public void setBinaryBytes(String key, int binaryBytes) {
-		getInfo(key).binaryBytes = binaryBytes;
+		getInfo(key).binaryBytes = notNegative(binaryBytes);
 	}
 
 	public long getTimeToCreateInMilliseconds(String key) {
@@ -78,7 +78,7 @@ public class StatsData {
 
 	public void setTimeToCreateInMilliseconds(String key,
 			long timeToCreateInMilliseconds) {
-		getInfo(key).timeToCreateInMilliseconds = timeToCreateInMilliseconds;
+		getInfo(key).timeToCreateInMilliseconds = notNegative(timeToCreateInMilliseconds);
 	}
 
 	public long getTimeToReadInMilliseconds(String key) {
@@ -87,7 +87,7 @@ public class StatsData {
 
 	public void setTimeToReadInMilliseconds(String key,
 			long timeToReadInMilliseconds) {
-		getInfo(key).timeToReadInMilliseconds = timeToReadInMilliseconds;
+		getInfo(key).timeToReadInMilliseconds = notNegative(timeToReadInMilliseconds);
 	}
 
 	private StatsInfo getInfo(String key) {
@@ -111,15 +111,15 @@ public class StatsData {
 
 		for (String key : stats.keySet()) {
 			// ignore the results for the first file
-			if(key.contains("File000000.")) {
+			if (key.contains("File000000.")) {
 				continue;
 			}
 			StatsInfo statsInfo = stats.get(key);
 			bw.write(key + "," + statsInfo.fileExt + ","
-					+ statsInfo.numberOfPhotos + ","
-					+ statsInfo.dataArrayRows + ","
-					+ statsInfo.sizeOnDiskInBytes + "," + statsInfo.binaryBytes
-					+ "," + statsInfo.timeToCreateInMilliseconds + ","
+					+ statsInfo.numberOfPhotos + "," + statsInfo.dataArrayRows
+					+ "," + statsInfo.sizeOnDiskInBytes + ","
+					+ statsInfo.binaryBytes + ","
+					+ statsInfo.timeToCreateInMilliseconds + ","
 					+ statsInfo.timeToReadInMilliseconds + "\n");
 		}
 		bw.close();
@@ -153,5 +153,19 @@ public class StatsData {
 		private int binaryBytes;
 		private long timeToCreateInMilliseconds;
 		private long timeToReadInMilliseconds;
+	}
+
+	private int notNegative(int i) {
+		if (i < 0)
+			throw new IllegalArgumentException(i
+					+ " must be a positive number.");
+		return i;
+	}
+
+	private long notNegative(long l) {
+		if (l < 0)
+			throw new IllegalArgumentException(l
+					+ " must be a positive number.");
+		return l;
 	}
 }
