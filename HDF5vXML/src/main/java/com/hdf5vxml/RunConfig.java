@@ -53,7 +53,11 @@ public class RunConfig {
 			}
 
 			fileCount = Integer.parseInt(props.getProperty(FILE_COUNT).trim());
-			// the information about the first file gets excluded to ignore VM warmup
+			if(fileCount <= 0) {
+				throw new Exception("file.count must be greater than zero.");	
+			}
+			
+			// the information about the first file gets excluded to ignore VM warm up
 			++fileCount;
 			meanRows = Integer.parseInt(props.getProperty(ARRAY_ROW_MEAN)
 					.trim());
@@ -85,7 +89,7 @@ public class RunConfig {
 			return true;
 		} catch (Exception e) {
 			out.println("Unable to load properties from file: " + propFileName
-					+ ", because " + e.getMessage() + ". Quitting.");
+					+ ": " + e.getMessage() + ". Quitting.");
 			return false;
 		}
 	}
