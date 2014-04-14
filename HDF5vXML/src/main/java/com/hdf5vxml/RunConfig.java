@@ -82,9 +82,9 @@ public class RunConfig {
 			photoDir = photoDir.replaceAll("\\\\", "/");
 
 			if (!targetDir.endsWith("/"))
-				targetDir += "/";
+				targetDir = targetDir += "/";
 			if (!photoDir.endsWith("/"))
-				photoDir += "/";
+				photoDir = photoDir += "/";
 
 			return true;
 		} catch (Exception e) {
