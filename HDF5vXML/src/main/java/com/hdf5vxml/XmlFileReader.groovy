@@ -15,7 +15,7 @@ public class XmlFileReader implements IFileReader {
 
 		String inputFile = HDF5vXML.CONFIG.getTargetDir() + fileDescriptor.getFileName() + ".xml"
 
-		// about to start reading the CSV file
+		// about to start reading the XML file
 		xmlReadStartTime = System.currentTimeMillis()
 
 		// parse the file
