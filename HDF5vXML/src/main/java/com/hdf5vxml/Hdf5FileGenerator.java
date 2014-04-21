@@ -43,8 +43,9 @@ public class Hdf5FileGenerator implements IFileGenerator {
 				fileDescriptor.getFileName() + ARRAY_EXT, elapsedTime);
 		HDF5vXML.DATA.setNumberOfPhotos(fileDescriptor.getFileName()
 				+ ARRAY_EXT, fileDescriptor.getNumberOfPhotos());
-		HDF5vXML.DATA.setDataArrayRows(fileDescriptor.getFileName()
-				+ ARRAY_EXT, fileDescriptor.getRows());
+		HDF5vXML.DATA.setDataArrayRows(
+				fileDescriptor.getFileName() + ARRAY_EXT,
+				fileDescriptor.getRows());
 
 		// write opaque image file
 		startTime = System.currentTimeMillis();
@@ -144,7 +145,7 @@ public class Hdf5FileGenerator implements IFileGenerator {
 					"2DArray", ff, aGroup);
 		}
 
-		// import three images in opaque format
+		// import images in opaque format
 		if (HDF5vXML.CONFIG.getMeanPhotos() > 0) {
 			ff.createGroup("ImageGroup", null);
 			Group pGroup = (Group) ff.get("ImageGroup");
@@ -353,53 +354,47 @@ public class Hdf5FileGenerator implements IFileGenerator {
 			throws Exception {
 
 		int space, dtype, dset, byteCount = 0;
-		int status;
+		
+		BufferedInputStream in = new BufferedInputStream(new FileInputStream(
+				imgFileName));
+		byteCount = in.available();
 
-		// read image file
-		BufferedImage image = null;
-		try {
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(imgFileName));
-			byteCount = in.available();
-			image = ImageIO.read(in);
-			in.close();
-		} catch (Throwable err) {
-			image = null;
-		}
-
-		if (image == null)
-			throw new UnsupportedOperationException("Failed to read image: "
-					+ imgFileName);
-
-		int h = image.getHeight();
-		int w = image.getWidth();
 		long[] dims = { byteCount };
-		int[] data = new int[h * w];
+		byte[] data = new byte[byteCount];
 
-		// copy the image data
-		int idx = 0;
-		int rgb = 0;
-		for (int i = 0; i < h; i++) {
-			for (int j = 0; j < w; j++) {
-				rgb = image.getRGB(j, i);
-				data[idx++] = rgb;
-			}
-		}
+		in.read(data, 0, byteCount);
+		in.close();
+		
+		// String hex = bytesToHex(data);
+		// System.out.println(hex.substring(0, 20));
 
-		// think 1 should be h * w, but does not work (equals length)
 		dtype = H5.H5Tcreate(HDF5Constants.H5T_OPAQUE, 1);
-		status = H5.H5Tset_tag(dtype, "Tag");
-
 		space = H5.H5Screate_simple(1, dims, null);
 		dset = H5.H5Dcreate(hdfFile.getFID(),
 				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/'))
 						+ "." + HDF5vXML.PHOTOS.getSequence(), dtype, space,
 				HDF5Constants.H5P_DEFAULT);
-		status = H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL,
-				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
+		H5.H5Dwrite(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+				HDF5Constants.H5P_DEFAULT, data);
 
-		status = H5.H5Dclose(dset);
-		status = H5.H5Sclose(space);
-		status = H5.H5Tclose(dtype);
+		if (dset >= 0)
+			H5.H5Dclose(dset);
+		if (space >= 0)
+			H5.H5Sclose(space);
+		if (dtype >= 0)
+			H5.H5Tclose(dtype);
 	}
+
+	// for debugging
+//	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+//
+//	public static String bytesToHex(byte[] bytes) {
+//		char[] hexChars = new char[bytes.length * 2];
+//		for (int j = 0; j < bytes.length; j++) {
+//			int v = bytes[j] & 0xFF;
+//			hexChars[j * 2] = hexArray[v >>> 4];
+//			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+//		}
+//		return new String(hexChars);
+//	}
 }

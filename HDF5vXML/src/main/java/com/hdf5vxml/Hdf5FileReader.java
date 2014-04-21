@@ -1,6 +1,20 @@
 package com.hdf5vxml;
 
 import static java.lang.System.out;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.FileFormat;
@@ -115,9 +129,9 @@ public class Hdf5FileReader implements IFileReader {
 			FileFormat hdfFile, Group pGroup) throws Exception {
 		int fid = -1, did = -1, rid = -1;
 		int[][] readValues = new int[rows][cols];
-		
+
 		// nothing to read if rows=0
-		if(rows == 0) {
+		if (rows == 0) {
 			return;
 		}
 
@@ -201,28 +215,34 @@ public class Hdf5FileReader implements IFileReader {
 	private void readOpaqueImageDataset(String imgFileName, FileFormat hdfFile,
 			Group pGroup, String hdfFileType) throws Exception {
 
-		int space, dtype, dset;
-		int status;
-		long[] DIMS = { 1 };
+		int dtype, dset;
 
-		// read image file
+		// read image file into integer array
 		dset = H5.H5Dopen(hdfFile.getFID(),
 				pGroup + imgFileName.substring(imgFileName.lastIndexOf('/')),
 				HDF5Constants.H5P_DEFAULT);
 		dtype = H5.H5Dget_type(dset);
-		int len = H5.H5Tget_size(dtype);
-		// System.out.println("? len=" + len);
-		String tag = H5.H5Tget_tag(dtype);
 
-		space = H5.H5Dget_space(dset);
-		int ndims = H5.H5Sget_simple_extent_dims(space, DIMS, null);
-		// TODO: setting limit? 4MB for now.
-		int[] data = new int[4000000];
-		status = H5.H5Dread(dset, dtype, HDF5Constants.H5S_ALL,
-				HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, data);
+		long buffSize = H5.H5Dget_storage_size(dset);
+		byte[] data = new byte[(int) buffSize];
+		H5.H5Dread(dset, dtype, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+				HDF5Constants.H5P_DEFAULT, data);
 
-		status = H5.H5Dclose(dset);
-		status = H5.H5Sclose(space);
-		status = H5.H5Tclose(dtype);
+		// check for equality between file on disk and HDF5 dataset
+//		InputStream stream = new ByteArrayInputStream(data);		
+//		File file = new File("/home/hadoop/tmp/images/photo0.jpg");  
+//	    FileInputStream fis = new FileInputStream(file); 
+//	    for(int i=0; i<21; i++)
+//	    	System.out.print(fis.read() + ",");
+//	    System.out.println();
+//	    for(int i=0; i<21; i++)
+//	    	System.out.print(stream.read() + ",");
+//	    System.out.println();
+//		fis.close();
+		
+		if (dset >= 0)
+			H5.H5Dclose(dset);
+		if (dtype >= 0)
+			H5.H5Tclose(dtype);
 	}
 }
